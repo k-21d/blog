@@ -1,0 +1,500 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Spring依赖查找 | 学习博客</title>
+<meta name="description" content="Java Blog" />
+<link rel="shortcut icon" href="https://k-21d.github.io/favicon.ico?v=1585835309377">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://k-21d.github.io/styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://k-21d.github.io">
+  <img class="avatar" src="https://k-21d.github.io/images/avatar.png?v=1585835309377" alt="">
+  </a>
+  <h1 class="site-title">
+    学习博客
+  </h1>
+  <p class="site-description">
+    Java Blog
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="https://k-21d.github.io/archives" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              Spring依赖查找
+            </h2>
+            <div class="post-info">
+              <span>
+                2020-02-01
+              </span>
+              <span>
+                4 min read
+              </span>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content">
+                <h2 id="单一类型依赖查找">单一类型依赖查找</h2>
+<p>单一类型依赖查找接口 - BeanFactory</p>
+<h3 id="根据-bean-名称查找">根据 Bean 名称查找</h3>
+<ul>
+<li>getBean(String)</li>
+<li>Spring 2.5 覆盖默认参数：getBean(String,Object...)</li>
+</ul>
+<h3 id="根据-bean-类型查找">根据 Bean 类型查找</h3>
+<ul>
+<li>
+<p>Bean 实时查找</p>
+<ul>
+<li>Spring 3.0 getBean(Class)</li>
+<li>Spring 4.1 覆盖默认参数：getBean(Class,Object...)</li>
+</ul>
+</li>
+<li>
+<p>Spring 5.1 Bean 延迟查找</p>
+<ul>
+<li>
+<p>getBeanProvider(Class)</p>
+<pre><code>public class ObjectProviderDemo {
+
+    public static void main(String[] args) {
+        AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext();
+        applicationContext.register(ObjectProviderDemo.class);
+        applicationContext.refresh();
+        lookupByObjectProvider(applicationContext);
+        applicationContext.close();
+    }
+
+    @Bean
+    public String helloWorld(){
+        //方法名就是Bean的名称
+        return &quot;Hello,World&quot;;
+    }
+    private static void lookupByObjectProvider(AnnotationConfigApplicationContext applicationContext) {
+        ObjectProvider&lt;String&gt; beanProvider = applicationContext.getBeanProvider(String.class);
+        System.out.println(beanProvider.getObject());
+    }
+}
+</code></pre>
+</li>
+<li>
+<p>getBeanProvider(ResolvableType)</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="根据-bean-名称-类型查找getbeanstringclass">根据 Bean 名称 + 类型查找：getBean(String,Class)</h3>
+<h2 id="集合类型依赖查找">集合类型依赖查找</h2>
+<p>集合类型依赖查找接口 - ListableBeanFactory</p>
+<h3 id="根据-bean-类型查找-2">根据 Bean 类型查找</h3>
+<ul>
+<li>获取同类型 Bean 名称列表
+<ul>
+<li>getBeanNamesForType(Class)</li>
+<li>Spring 4.2 getBeanNamesForType(ResolvableType)</li>
+</ul>
+</li>
+<li>获取同类型 Bean 实例列表
+<ul>
+<li>getBeansOfType(Class) 以及重载方法</li>
+</ul>
+</li>
+</ul>
+<h3 id="通过注解类型查找">通过注解类型查找</h3>
+<ul>
+<li>Spring 3.0 获取标注类型 Bean 名称列表
+<ul>
+<li>getBeanNamesForAnnotation(Class&lt;? extends Annotation&gt;)</li>
+</ul>
+</li>
+<li>Spring 3.0 获取标注类型 Bean 实例列表
+<ul>
+<li>getBeansWithAnnotation(Class&lt;? extends Annotation&gt;)</li>
+</ul>
+</li>
+<li>Spring 3.0 获取指定名称 + 标注类型 Bean 实例
+<ul>
+<li>findAnnotationOnBean(String,Class&lt;? extends Annotation&gt;)</li>
+</ul>
+</li>
+</ul>
+<h2 id="层次性依赖查找">层次性依赖查找</h2>
+<p>层次性依赖查找接口 - HierarchicalBeanFactory</p>
+<h3 id="双亲-beanfactorygetparentbeanfactory">双亲 BeanFactory：getParentBeanFactory()</h3>
+<h3 id="层次性查找">层次性查找</h3>
+<ul>
+<li>根据 Bean 名称查找
+<ul>
+<li>基于 containsLocalBean 方法实现</li>
+</ul>
+</li>
+<li>根据 Bean 类型查找实例列表
+<ul>
+<li>单一类型：BeanFactoryUtils#beanOfType</li>
+<li>集合类型：BeanFactoryUtils#beansOfTypeIncludingAncestors</li>
+</ul>
+</li>
+<li>根据 Java 注解查找名称列表
+<ul>
+<li>集合类型：BeanFactoryUtils#beansOfTypeIncludingAncestors</li>
+</ul>
+</li>
+</ul>
+<h2 id="延迟依赖查找">延迟依赖查找</h2>
+<ul>
+<li>
+<p><code>org.springframework.beans.factory.ObjectFactory</code></p>
+</li>
+<li>
+<p><code>org.springframework.beans.factory.ObjectProvider</code></p>
+<ul>
+<li>
+<p>Spring 5 对 Java 8 特性扩展</p>
+<ul>
+<li>
+<p>函数式接口</p>
+<ul>
+<li>
+<p>getIfAvailable(Supplier)</p>
+<pre><code>ObjectProvider&lt;User&gt; beanProvider = applicationContext.getBeanProvider(User.class);
+User user = beanProvider.getIfAvailable(User::createUser);
+</code></pre>
+</li>
+<li>
+<p>ifAvailable(Consumer)</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Stream 扩展 - stream()</p>
+<pre><code>@Bean
+public String message(){
+   return &quot;Message&quot;;
+}
+private static void looupByStreamOps(AnnotationConfigApplicationContext applicationContext) {
+        ObjectProvider&lt;String&gt; beanProvider = applicationContext.getBeanProvider(String.class);
+        beanProvider.stream().forEach(System.out::print);
+}
+</code></pre>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="安全依赖查找">安全依赖查找</h2>
+<p>依赖查找安全性对比</p>
+<table>
+<thead>
+<tr>
+<th>依赖查找类型</th>
+<th style="text-align:left">代表实现</th>
+<th style="text-align:center">是否安全</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>单一类型查找</td>
+<td style="text-align:left">BeanFactory#getBean</td>
+<td style="text-align:center">否</td>
+</tr>
+<tr>
+<td></td>
+<td style="text-align:left">ObjectFactory#getObject</td>
+<td style="text-align:center">否</td>
+</tr>
+<tr>
+<td></td>
+<td style="text-align:left">ObjectProvider#getIfAvailable</td>
+<td style="text-align:center">是</td>
+</tr>
+<tr>
+<td>集合类型查找</td>
+<td style="text-align:left">ListableBeanFactory#getBeansOfType</td>
+<td style="text-align:center">是</td>
+</tr>
+<tr>
+<td></td>
+<td style="text-align:left">ObjectProvider#stream</td>
+<td style="text-align:center">是</td>
+</tr>
+</tbody>
+</table>
+<p>注意：层次性依赖查找的安全性取决于其扩展的单一或集合类型的 BeanFactory 接口</p>
+<h2 id="内建可查找的依赖">内建可查找的依赖</h2>
+<p>AbstractApplicationContext 内建可查找的依赖</p>
+<table>
+<thead>
+<tr>
+<th>Bean 名称</th>
+<th>Bean 实例</th>
+<th>使用场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>environment</td>
+<td>Environment 对象</td>
+<td>外部化配置以及 Profiles</td>
+</tr>
+<tr>
+<td>systemProperties</td>
+<td>java.util.Properties 对象</td>
+<td>java.util.Properties 对象</td>
+</tr>
+<tr>
+<td>systemEnvironment</td>
+<td>java.util.Map 对象</td>
+<td>操作系统环境变量</td>
+</tr>
+<tr>
+<td>messageSource</td>
+<td>MessageSource 对象</td>
+<td>国际化文案</td>
+</tr>
+<tr>
+<td>lifecycleProcessor</td>
+<td>LifecycleProcessor 对象</td>
+<td>Lifecycle Bean 处理器</td>
+</tr>
+<tr>
+<td>applicationEventMulticaster</td>
+<td>ApplicationEventMulticaster 对象</td>
+<td>Spring 事件广播器</td>
+</tr>
+</tbody>
+</table>
+<p>注解驱动 Spring 应用上下文内建可查找的依赖（部分）</p>
+<table>
+<thead>
+<tr>
+<th>Bean 实例</th>
+<th>使用场景</th>
+<th>Bean 名称</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ConfigurationClassPostProcessor 对象</td>
+<td>处理 Spring 配置类</td>
+<td><code>org.springframework.context.annotation.internalConfigurationAnnotationProcessor</code></td>
+</tr>
+<tr>
+<td>AutowiredAnnotationBeanPostProcessor 对象</td>
+<td>处理 @Autowired 以及 @Value注解</td>
+<td><code>org.springframework.context.annotation.internalAutowiredAnnotationProcessor</code></td>
+</tr>
+<tr>
+<td>CommonAnnotationBeanPostProcessor 对象</td>
+<td>（条件激活）处理 JSR-250 注解，如 @PostConstruct 等</td>
+<td><code>org.springframework.context.annotation.internalCommonAnnotationProcessor</code></td>
+</tr>
+<tr>
+<td>EventListenerMethodProcessor对象</td>
+<td>处理标注 @EventListener 的Spring 事件监听方法</td>
+<td><code>org.springframework.context.event.internalEventListenerProcessor</code></td>
+</tr>
+<tr>
+<td>DefaultEventListenerFactory 对象</td>
+<td>@EventListener 事件监听方法适配为 ApplicationListener</td>
+<td><code>org.springframework.context.event.internalEventListenerFactory</code></td>
+</tr>
+<tr>
+<td>PersistenceAnnotationBeanPostProcessor 对象</td>
+<td>（条件激活）处理 JPA 注解场景</td>
+<td><code>org.springframework.context.annotation.internalPersistenceAnnotationProcessor</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="依赖查找中的经典异常">依赖查找中的经典异常</h2>
+<p>BeansException 子类型</p>
+<table>
+<thead>
+<tr>
+<th>异常类型</th>
+<th>触发条件（举例）</th>
+<th>场景举例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>NoSuchBeanDefinitionException</td>
+<td>当查找 Bean 不存在于 IoC 容器时</td>
+<td>BeanFactory#getBean<br/>ObjectFactory#getObject</td>
+</tr>
+<tr>
+<td>NoUniqueBeanDefinitionException</td>
+<td>类型依赖查找时，IoC 容器存在多个 Bean 实例</td>
+<td>BeanFactory#getBean(Class)</td>
+</tr>
+<tr>
+<td>BeanInstantiationException</td>
+<td>当 Bean 所对应的类型非具体类时</td>
+<td>BeanFactory#getBean</td>
+</tr>
+<tr>
+<td>BeanCreationException</td>
+<td>当 Bean 初始化过程中</td>
+<td>Bean 初始化方法执行异常时</td>
+</tr>
+<tr>
+<td>BeanDefinitionStoreException</td>
+<td>当 BeanDefinition 配置元信息非法时</td>
+<td>XML 配置资源无法打开时</td>
+</tr>
+</tbody>
+</table>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#%E5%8D%95%E4%B8%80%E7%B1%BB%E5%9E%8B%E4%BE%9D%E8%B5%96%E6%9F%A5%E6%89%BE">单一类型依赖查找</a>
+<ul>
+<li><a href="#%E6%A0%B9%E6%8D%AE-bean-%E5%90%8D%E7%A7%B0%E6%9F%A5%E6%89%BE">根据 Bean 名称查找</a></li>
+<li><a href="#%E6%A0%B9%E6%8D%AE-bean-%E7%B1%BB%E5%9E%8B%E6%9F%A5%E6%89%BE">根据 Bean 类型查找</a></li>
+<li><a href="#%E6%A0%B9%E6%8D%AE-bean-%E5%90%8D%E7%A7%B0-%E7%B1%BB%E5%9E%8B%E6%9F%A5%E6%89%BEgetbeanstringclass">根据 Bean 名称 + 类型查找：getBean(String,Class)</a></li>
+</ul>
+</li>
+<li><a href="#%E9%9B%86%E5%90%88%E7%B1%BB%E5%9E%8B%E4%BE%9D%E8%B5%96%E6%9F%A5%E6%89%BE">集合类型依赖查找</a>
+<ul>
+<li><a href="#%E6%A0%B9%E6%8D%AE-bean-%E7%B1%BB%E5%9E%8B%E6%9F%A5%E6%89%BE-2">根据 Bean 类型查找</a></li>
+<li><a href="#%E9%80%9A%E8%BF%87%E6%B3%A8%E8%A7%A3%E7%B1%BB%E5%9E%8B%E6%9F%A5%E6%89%BE">通过注解类型查找</a></li>
+</ul>
+</li>
+<li><a href="#%E5%B1%82%E6%AC%A1%E6%80%A7%E4%BE%9D%E8%B5%96%E6%9F%A5%E6%89%BE">层次性依赖查找</a>
+<ul>
+<li><a href="#%E5%8F%8C%E4%BA%B2-beanfactorygetparentbeanfactory">双亲 BeanFactory：getParentBeanFactory()</a></li>
+<li><a href="#%E5%B1%82%E6%AC%A1%E6%80%A7%E6%9F%A5%E6%89%BE">层次性查找</a></li>
+</ul>
+</li>
+<li><a href="#%E5%BB%B6%E8%BF%9F%E4%BE%9D%E8%B5%96%E6%9F%A5%E6%89%BE">延迟依赖查找</a></li>
+<li><a href="#%E5%AE%89%E5%85%A8%E4%BE%9D%E8%B5%96%E6%9F%A5%E6%89%BE">安全依赖查找</a></li>
+<li><a href="#%E5%86%85%E5%BB%BA%E5%8F%AF%E6%9F%A5%E6%89%BE%E7%9A%84%E4%BE%9D%E8%B5%96">内建可查找的依赖</a></li>
+<li><a href="#%E4%BE%9D%E8%B5%96%E6%9F%A5%E6%89%BE%E4%B8%AD%E7%9A%84%E7%BB%8F%E5%85%B8%E5%BC%82%E5%B8%B8">依赖查找中的经典异常</a></li>
+</ul>
+</li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://k-21d.github.io/post/spring-bean-ji-chu/">
+              <h3 class="post-title">
+                Spring Bean基础
+              </h3>
+            </a>
+          </div>
+        
+
+        
+
+        <div class="site-footer">
+  Powered by k21d | 
+  <a class="rss" href="https://k-21d.github.io/atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+
+  let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+  // This should probably be throttled.
+  // Especially because it triggers during smooth scrolling.
+  // https://lodash.com/docs/4.17.10#throttle
+  // You could do like...
+  // window.addEventListener("scroll", () => {
+  //    _.throttle(doThatStuff, 100);
+  // });
+  // Only not doing it here to keep this Pen dependency-free.
+
+  window.addEventListener("scroll", event => {
+    let fromTop = window.scrollY;
+
+    mainNavLinks.forEach((link, index) => {
+      let section = document.getElementById(decodeURI(link.hash).substring(1));
+      let nextSection = null
+      if (mainNavLinks[index + 1]) {
+        nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+      }
+      if (section.offsetTop <= fromTop) {
+        if (nextSection) {
+          if (nextSection.offsetTop > fromTop) {
+            link.classList.add("current");
+          } else {
+            link.classList.remove("current");    
+          }
+        } else {
+          link.classList.add("current");
+        }
+      } else {
+        link.classList.remove("current");
+      }
+    });
+  });
+
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
