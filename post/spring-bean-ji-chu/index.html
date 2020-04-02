@@ -1,97 +1,102 @@
+<!DOCTYPE html>
 <html>
   <head>
-    <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta charset="utf-8" >
+
 <title>Spring Bean基础 | 学习博客</title>
-<meta name="description" content="Java Blog" />
-<link rel="shortcut icon" href="https://k-21d.github.io/favicon.ico?v=1585835387110">
+<meta name="description" content="Java Blog">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://k-21d.github.io/favicon.ico?v=1585851729157">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://k-21d.github.io/styles/main.css">
 
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
 
 
 
   </head>
   <body>
-    <div class="main">
-      <div class="main-content">
-        <div class="site-header">
-  <a href="https://k-21d.github.io">
-  <img class="avatar" src="https://k-21d.github.io/images/avatar.png?v=1585835387110" alt="">
-  </a>
-  <h1 class="site-title">
-    学习博客
-  </h1>
-  <p class="site-description">
-    Java Blog
-  </p>
-  <div class="menu-container">
-    
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://k-21d.github.io">
+        <img src="https://k-21d.github.io/images/avatar.png?v=1585851729157" class="site-logo">
+        <h1 class="site-title">学习博客</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
       
-        <a href="https://k-21d.github.io/archives" class="menu">
-          首页
-        </a>
+        
+          <a href="https://k-21d.github.io/archives" class="site-nav">
+            首页
+          </a>
+        
       
-    
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
       
-        <a href="/archives" class="menu">
-          归档
-        </a>
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
       
-    
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
       
-        <a href="/tags" class="menu">
-          标签
-        </a>
-      
-    
-      
-        <a href="/post/about" class="menu">
-          关于
-        </a>
-      
-    
+    </div>
   </div>
-  <div class="social-container">
-    
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
       
-    
+        
       
-    
+        
       
-    
+        
       
-    
+        
       
-    
+        
+      
+    </div>
+    <div class="site-description">
+      Java Blog
+    </div>
+    <div class="site-footer">
+      Powered by k21d | <a class="rss" href="https://k-21d.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
   </div>
 </div>
 
-        <div class="post-detail">
-          <article class="post">
-            <h2 class="post-title">
-              Spring Bean基础
-            </h2>
-            <div class="post-info">
-              <span>
-                2020-01-27
-              </span>
-              <span>
-                6 min read
-              </span>
-              
-                <a href="https://k-21d.github.io/tag/TNP4BReFW/" class="post-tag">
-                  # spring
-                </a>
-              
-            </div>
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">Spring Bean基础</h2>
+            <div class="post-date">2020-01-27</div>
             
-            <div class="post-content-wrapper">
-              <div class="post-content">
-                <h2 id="定义spring-bean">定义Spring Bean</h2>
+            <div class="post-content">
+              <h2 id="定义spring-bean">定义Spring Bean</h2>
 <ul>
 <li>什么是BeanDefinition？</li>
 <li>BeanDefinition是Spring Framework中定义Bean的配置元信息接口，包含：
@@ -357,108 +362,54 @@ finishBeanFactoryInitialization(beanFactory);
 <li>Spring Bean覆盖的finalize()方法被回调</li>
 </ul>
 
-              </div>
-              <div class="toc-container">
-                <ul class="markdownIt-TOC">
-<li>
-<ul>
-<li><a href="#%E5%AE%9A%E4%B9%89spring-bean">定义Spring Bean</a></li>
-<li><a href="#beandefinition%E5%85%83%E4%BF%A1%E6%81%AF">BeanDefinition元信息</a></li>
-<li><a href="#%E5%91%BD%E5%90%8Dspring-bean">命名Spring Bean</a>
-<ul>
-<li><a href="#bean-%E7%9A%84%E5%90%8D%E7%A7%B0">Bean 的名称</a></li>
-<li><a href="#bean-%E5%90%8D%E7%A7%B0%E7%94%9F%E6%88%90%E5%99%A8beannamegenerator">Bean 名称生成器（BeanNameGenerator）</a></li>
-</ul>
-</li>
-<li><a href="#spring-bean%E7%9A%84%E5%88%AB%E5%90%8D">Spring Bean的别名</a></li>
-<li><a href="#%E6%B3%A8%E5%86%8Cspring-bean">注册Spring Bean</a>
-<ul>
-<li><a href="#beandefinition-%E6%B3%A8%E5%86%8C">BeanDefinition 注册</a></li>
-<li><a href="#%E5%A4%96%E9%83%A8%E5%8D%95%E4%BE%8B%E5%AF%B9%E8%B1%A1%E6%B3%A8%E5%86%8C">外部单例对象注册</a></li>
-</ul>
-</li>
-<li><a href="#%E5%AE%9E%E4%BE%8B%E5%8C%96-spring-bean">实例化 Spring Bean</a></li>
-<li><a href="#%E5%88%9D%E5%A7%8B%E5%8C%96-spring-bean">初始化 Spring Bean</a>
-<ul>
-<li><a href="#bean-%E5%88%9D%E5%A7%8B%E5%8C%96initialization">Bean 初始化（Initialization）</a></li>
-</ul>
-</li>
-<li><a href="#%E5%BB%B6%E8%BF%9F%E5%88%9D%E5%A7%8B%E5%8C%96-spring-bean">延迟初始化 Spring Bean</a>
-<ul>
-<li><a href="#bean-%E5%BB%B6%E8%BF%9F%E5%88%9D%E5%A7%8B%E5%8C%96lazy-initialization">Bean 延迟初始化（Lazy Initialization）</a></li>
-</ul>
-</li>
-<li><a href="#%E9%94%80%E6%AF%81-spring-bean">销毁 Spring Bean</a></li>
-<li><a href="#%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6-spring-bean">垃圾回收 Spring Bean</a></li>
-</ul>
-</li>
-</ul>
-
-              </div>
             </div>
-          </article>
-        </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://k-21d.github.io/tag/TNP4BReFW/" class="tag">
+                    spring
+                  </a>
+                
+              </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://k-21d.github.io/post/spring-ioc-rong-qi-gai-shu/">
+                  <h3 class="post-title">
+                    Spring IoC容器概述
+                  </h3>
+                </a>
+              </div>
+            
 
-        
-          <div class="next-post">
-            <div class="next">下一篇</div>
-            <a href="https://k-21d.github.io/post/spring-ioc-rong-qi-gai-shu/">
-              <h3 class="post-title">
-                Spring IoC容器概述
-              </h3>
-            </a>
+            
+
           </div>
-        
 
-        
+        </div>
+      </div>
+    </div>
 
-        <div class="site-footer">
-  Powered by k21d | 
-  <a class="rss" href="https://k-21d.github.io/atom.xml" target="_blank">RSS</a>
-</div>
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
 
-<script>
-  hljs.initHighlightingOnLoad()
+<script type="application/javascript">
 
-  let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+AOS.init();
 
-  // This should probably be throttled.
-  // Especially because it triggers during smooth scrolling.
-  // https://lodash.com/docs/4.17.10#throttle
-  // You could do like...
-  // window.addEventListener("scroll", () => {
-  //    _.throttle(doThatStuff, 100);
-  // });
-  // Only not doing it here to keep this Pen dependency-free.
+hljs.initHighlightingOnLoad()
 
-  window.addEventListener("scroll", event => {
-    let fromTop = window.scrollY;
-
-    mainNavLinks.forEach((link, index) => {
-      let section = document.getElementById(decodeURI(link.hash).substring(1));
-      let nextSection = null
-      if (mainNavLinks[index + 1]) {
-        nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
-      }
-      if (section.offsetTop <= fromTop) {
-        if (nextSection) {
-          if (nextSection.offsetTop > fromTop) {
-            link.classList.add("current");
-          } else {
-            link.classList.remove("current");    
-          }
-        } else {
-          link.classList.add("current");
-        }
-      } else {
-        link.classList.remove("current");
-      }
-    });
-  });
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
 
 </script>
 
-      </div>
-    </div>
+
+
+
   </body>
 </html>

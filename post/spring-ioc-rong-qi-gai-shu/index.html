@@ -1,97 +1,102 @@
+<!DOCTYPE html>
 <html>
   <head>
-    <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta charset="utf-8" >
+
 <title>Spring IoC容器概述 | 学习博客</title>
-<meta name="description" content="Java Blog" />
-<link rel="shortcut icon" href="https://k-21d.github.io/favicon.ico?v=1585835387110">
+<meta name="description" content="Java Blog">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://k-21d.github.io/favicon.ico?v=1585851729157">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://k-21d.github.io/styles/main.css">
 
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
 
 
 
   </head>
   <body>
-    <div class="main">
-      <div class="main-content">
-        <div class="site-header">
-  <a href="https://k-21d.github.io">
-  <img class="avatar" src="https://k-21d.github.io/images/avatar.png?v=1585835387110" alt="">
-  </a>
-  <h1 class="site-title">
-    学习博客
-  </h1>
-  <p class="site-description">
-    Java Blog
-  </p>
-  <div class="menu-container">
-    
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://k-21d.github.io">
+        <img src="https://k-21d.github.io/images/avatar.png?v=1585851729157" class="site-logo">
+        <h1 class="site-title">学习博客</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
       
-        <a href="https://k-21d.github.io/archives" class="menu">
-          首页
-        </a>
+        
+          <a href="https://k-21d.github.io/archives" class="site-nav">
+            首页
+          </a>
+        
       
-    
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
       
-        <a href="/archives" class="menu">
-          归档
-        </a>
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
       
-    
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
       
-        <a href="/tags" class="menu">
-          标签
-        </a>
-      
-    
-      
-        <a href="/post/about" class="menu">
-          关于
-        </a>
-      
-    
+    </div>
   </div>
-  <div class="social-container">
-    
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
       
-    
+        
       
-    
+        
       
-    
+        
       
-    
+        
       
-    
+        
+      
+    </div>
+    <div class="site-description">
+      Java Blog
+    </div>
+    <div class="site-footer">
+      Powered by k21d | <a class="rss" href="https://k-21d.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
   </div>
 </div>
 
-        <div class="post-detail">
-          <article class="post">
-            <h2 class="post-title">
-              Spring IoC容器概述
-            </h2>
-            <div class="post-info">
-              <span>
-                2020-01-20
-              </span>
-              <span>
-                5 min read
-              </span>
-              
-                <a href="https://k-21d.github.io/tag/TNP4BReFW/" class="post-tag">
-                  # spring
-                </a>
-              
-            </div>
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">Spring IoC容器概述</h2>
+            <div class="post-date">2020-01-20</div>
             
-            <div class="post-content-wrapper">
-              <div class="post-content">
-                <h2 id="spring-ioc依赖查找">Spring IoC依赖查找</h2>
+            <div class="post-content">
+              <h2 id="spring-ioc依赖查找">Spring IoC依赖查找</h2>
 <h3 id="根据bean名称查找">根据Bean名称查找</h3>
 <h4 id="实时查找">实时查找</h4>
 <p><code>User user = (User) beanFactory.getBean(&quot;user&quot;);</code></p>
@@ -337,126 +342,54 @@ applicationContext.refresh();
 <li>FactoryBean 是 创建 Bean 的一种方式，帮助实现复杂的初始化逻辑</li>
 </ul>
 
-              </div>
-              <div class="toc-container">
-                <ul class="markdownIt-TOC">
-<li>
-<ul>
-<li><a href="#spring-ioc%E4%BE%9D%E8%B5%96%E6%9F%A5%E6%89%BE">Spring IoC依赖查找</a>
-<ul>
-<li><a href="#%E6%A0%B9%E6%8D%AEbean%E5%90%8D%E7%A7%B0%E6%9F%A5%E6%89%BE">根据Bean名称查找</a>
-<ul>
-<li><a href="#%E5%AE%9E%E6%97%B6%E6%9F%A5%E6%89%BE">实时查找</a></li>
-<li><a href="#%E5%BB%B6%E6%97%B6%E6%9F%A5%E6%89%BE">延时查找</a></li>
-</ul>
-</li>
-<li><a href="#%E6%A0%B9%E6%8D%AEbean%E7%B1%BB%E5%9E%8B%E6%9F%A5%E6%89%BE">根据Bean类型查找</a>
-<ul>
-<li><a href="#%E5%8D%95%E4%B8%AAbean%E5%AF%B9%E8%B1%A1">单个Bean对象</a></li>
-<li><a href="#%E9%9B%86%E5%90%88bean%E5%AF%B9%E8%B1%A1">集合Bean对象</a></li>
-</ul>
-</li>
-<li><a href="#%E6%A0%B9%E6%8D%AEbean%E5%90%8D%E7%A7%B0%E7%B1%BB%E5%9E%8B%E6%9F%A5%E6%89%BE">根据Bean名称+类型查找</a></li>
-<li><a href="#%E6%A0%B9%E6%8D%AEjava%E6%B3%A8%E8%A7%A3%E6%9F%A5%E6%89%BE">根据Java注解查找</a></li>
-</ul>
-</li>
-<li><a href="#spring-ioc%E4%BE%9D%E8%B5%96%E6%B3%A8%E5%85%A5">Spring IoC依赖注入</a>
-<ul>
-<li><a href="#%E6%A0%B9%E6%8D%AEbean%E5%90%8D%E7%A7%B0%E6%B3%A8%E5%85%A5">根据Bean名称注入</a></li>
-<li><a href="#%E6%A0%B9%E6%8D%AEbean%E7%B1%BB%E5%9E%8B%E6%B3%A8%E5%85%A5">根据Bean类型注入</a></li>
-<li><a href="#%E6%B3%A8%E5%85%A5%E5%AE%B9%E5%99%A8%E5%86%85%E5%BB%BAbean%E5%AF%B9%E8%B1%A1">注入容器内建Bean对象</a></li>
-<li><a href="#%E6%B3%A8%E5%85%A5%E9%9D%9Ebean%E5%AF%B9%E8%B1%A1">注入非Bean对象</a></li>
-<li><a href="#%E6%B3%A8%E5%85%A5%E7%B1%BB%E5%9E%8B">注入类型</a></li>
-</ul>
-</li>
-<li><a href="#spring-ioc%E4%BE%9D%E8%B5%96%E6%9D%A5%E6%BA%90">Spring IoC依赖来源</a>
-<ul>
-<li><a href="#%E8%87%AA%E5%AE%9A%E4%B9%89bean">自定义Bean</a></li>
-<li><a href="#%E4%BE%9D%E8%B5%96%E6%B3%A8%E5%85%A5%E5%86%85%E5%BB%BA%E4%BE%9D%E8%B5%96">依赖注入（内建依赖）</a></li>
-<li><a href="#%E5%AE%B9%E5%99%A8%E5%86%85%E5%BB%BA%E4%BE%9D%E8%B5%96">容器内建依赖</a></li>
-</ul>
-</li>
-<li><a href="#spring-ioc%E9%85%8D%E7%BD%AE%E5%85%83%E4%BF%A1%E6%81%AF">Spring Ioc配置元信息</a>
-<ul>
-<li><a href="#bean-%E5%AE%9A%E4%B9%89%E9%85%8D%E7%BD%AE">Bean 定义配置</a></li>
-<li><a href="#ioc%E5%AE%B9%E5%99%A8%E9%85%8D%E7%BD%AE">IoC容器配置</a></li>
-<li><a href="#%E5%A4%96%E9%83%A8%E5%8C%96%E5%B1%9E%E6%80%A7%E9%85%8D%E7%BD%AE">外部化属性配置</a></li>
-</ul>
-</li>
-<li><a href="#spring-ioc%E5%AE%B9%E5%99%A8">Spring IoC容器</a></li>
-<li><a href="#spring-%E5%BA%94%E7%94%A8%E4%B8%8A%E4%B8%8B%E6%96%87">Spring 应用上下文</a></li>
-<li><a href="#%E4%BD%BF%E7%94%A8spring-ioc%E5%AE%B9%E5%99%A8">使用Spring IoC容器</a></li>
-<li><a href="#spring-ioc%E5%AE%B9%E5%99%A8%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F">Spring IoC容器生命周期</a></li>
-<li><a href="#beanfactory%E5%92%8Cfactorybean">BeanFactory和FactoryBean</a></li>
-</ul>
-</li>
-</ul>
-
-              </div>
             </div>
-          </article>
-        </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://k-21d.github.io/tag/TNP4BReFW/" class="tag">
+                    spring
+                  </a>
+                
+              </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://k-21d.github.io/post/chong-xin-ren-shi-ioc/">
+                  <h3 class="post-title">
+                    重新认识IoC
+                  </h3>
+                </a>
+              </div>
+            
 
-        
-          <div class="next-post">
-            <div class="next">下一篇</div>
-            <a href="https://k-21d.github.io/post/chong-xin-ren-shi-ioc/">
-              <h3 class="post-title">
-                重新认识IoC
-              </h3>
-            </a>
+            
+
           </div>
-        
 
-        
+        </div>
+      </div>
+    </div>
 
-        <div class="site-footer">
-  Powered by k21d | 
-  <a class="rss" href="https://k-21d.github.io/atom.xml" target="_blank">RSS</a>
-</div>
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
 
-<script>
-  hljs.initHighlightingOnLoad()
+<script type="application/javascript">
 
-  let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+AOS.init();
 
-  // This should probably be throttled.
-  // Especially because it triggers during smooth scrolling.
-  // https://lodash.com/docs/4.17.10#throttle
-  // You could do like...
-  // window.addEventListener("scroll", () => {
-  //    _.throttle(doThatStuff, 100);
-  // });
-  // Only not doing it here to keep this Pen dependency-free.
+hljs.initHighlightingOnLoad()
 
-  window.addEventListener("scroll", event => {
-    let fromTop = window.scrollY;
-
-    mainNavLinks.forEach((link, index) => {
-      let section = document.getElementById(decodeURI(link.hash).substring(1));
-      let nextSection = null
-      if (mainNavLinks[index + 1]) {
-        nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
-      }
-      if (section.offsetTop <= fromTop) {
-        if (nextSection) {
-          if (nextSection.offsetTop > fromTop) {
-            link.classList.add("current");
-          } else {
-            link.classList.remove("current");    
-          }
-        } else {
-          link.classList.add("current");
-        }
-      } else {
-        link.classList.remove("current");
-      }
-    });
-  });
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
 
 </script>
 
-      </div>
-    </div>
+
+
+
   </body>
 </html>
