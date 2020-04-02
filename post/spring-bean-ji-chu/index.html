@@ -1,0 +1,464 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Spring Bean基础 | 学习博客</title>
+<meta name="description" content="Java Blog" />
+<link rel="shortcut icon" href="https://k-21d.github.io/favicon.ico?v=1585819829763">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://k-21d.github.io/styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://k-21d.github.io">
+  <img class="avatar" src="https://k-21d.github.io/images/avatar.png?v=1585819829763" alt="">
+  </a>
+  <h1 class="site-title">
+    学习博客
+  </h1>
+  <p class="site-description">
+    Java Blog
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="https://k-21d.github.io/archives" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              Spring Bean基础
+            </h2>
+            <div class="post-info">
+              <span>
+                2020-01-27
+              </span>
+              <span>
+                6 min read
+              </span>
+              
+                <a href="https://k-21d.github.io/tag/TNP4BReFW/" class="post-tag">
+                  # spring
+                </a>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content">
+                <h2 id="定义spring-bean">定义Spring Bean</h2>
+<ul>
+<li>什么是BeanDefinition？</li>
+<li>BeanDefinition是Spring Framework中定义Bean的配置元信息接口，包含：
+<ul>
+<li>Bean的类名</li>
+<li>Bean行为配置元素，如作用域、自动绑定的模式、生命周期回调等</li>
+<li>其他Bean引用，又可成为合作者（Collaborators）或者依赖（Dependencies）</li>
+<li>配置设置，比如Bean属性（Properties）</li>
+</ul>
+</li>
+</ul>
+<h2 id="beandefinition元信息">BeanDefinition元信息</h2>
+<table>
+<thead>
+<tr>
+<th>属性 （Property ）</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Class</td>
+<td>Bean 全类名，必须是具体类，不能用抽象类或接口</td>
+</tr>
+<tr>
+<td>Name</td>
+<td>Bean 的名称或者 ID</td>
+</tr>
+<tr>
+<td>Scope</td>
+<td>Bean 的作用域（如：singleton、prototype 等）</td>
+</tr>
+<tr>
+<td>Constructor arguments</td>
+<td>Bean 构造器参数（用于依赖注入）</td>
+</tr>
+<tr>
+<td>Properties</td>
+<td>Bean 属性设置（用于依赖注入）</td>
+</tr>
+<tr>
+<td>Autowiring mode</td>
+<td>Bean 自动绑定模式（如：通过名称 byName）</td>
+</tr>
+<tr>
+<td>Lazy initialization mode</td>
+<td>Bean 延迟初始化模式（延迟和非延迟）</td>
+</tr>
+<tr>
+<td>Initialization method</td>
+<td>Bean 初始化回调方法名称</td>
+</tr>
+<tr>
+<td>Destruction method</td>
+<td>Bean 销毁回调方法名称</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>
+<p>BeanDefinition 构建</p>
+<ul>
+<li>
+<p>通过 <code>BeanDefinitionBuilder</code></p>
+<pre><code>BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(User.class);
+beanDefinitionBuilder.addPropertyValue(&quot;id&quot;,44);
+beanDefinitionBuilder.addPropertyValue(&quot;name&quot;,&quot;json&quot;);
+//获取 BeanDefinition 实例
+AbstractBeanDefinition beanDefinition = beanDefinitionBuilder.getBeanDefinition();
+//BeanDefinition并非Bean终态，可以自定义修改
+</code></pre>
+</li>
+<li>
+<p>通过 <code>AbstractBeanDefinition</code> 以及派生类</p>
+<pre><code>GenericBeanDefinition genericBeanDefinition = new GenericBeanDefinition();
+genericBeanDefinition.setBeanClass(User.class);
+MutablePropertyValues propertyValues = new MutablePropertyValues();
+propertyValues.addPropertyValue(&quot;id&quot;,4);
+propertyValues.addPropertyValue(&quot;name&quot;,&quot;kvein&quot;);
+genericBeanDefinition.setPropertyValues(propertyValues);
+</code></pre>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="命名spring-bean">命名Spring Bean</h2>
+<h3 id="bean-的名称">Bean 的名称</h3>
+<blockquote>
+<p>每个 Bean 拥有一个或多个标识符（identifiers），这些标识符在 Bean 所在的容器必须是唯一 的。通常，一个 Bean 仅有一个标识符，如果需要额外的，可考虑使用别名（Alias）来扩充。</p>
+</blockquote>
+<blockquote>
+<p>在基于 XML 的配置元信息中，开发人员可用 id 或者 name 属性来规定 Bean 的 标识符。通常 Bean 的 标识符由字母组成，允许出现特殊字符。如果要想引入 Bean 的别名的话，可在 name 属性使用半角逗号（“,”）或分号（“;”) 来间隔。</p>
+</blockquote>
+<blockquote>
+<p>Bean 的 id 或 name 属性并非必须制定，如果留空的话，容器会为 Bean 自动生成一个唯一的 名称。Bean的命名尽管没有限制，不过官方建议采用驼峰的方式，更符合 Java 的命名约定。</p>
+</blockquote>
+<h3 id="bean-名称生成器beannamegenerator">Bean 名称生成器（BeanNameGenerator）</h3>
+<p>由 Spring Framework 2.0.3 引入，框架內建两种实现：</p>
+<ul>
+<li>
+<p><code>DefaultBeanNameGenerator</code>：默认通用 BeanNameGenerator 实现</p>
+<pre><code>public class DefaultBeanNameGenerator implements BeanNameGenerator {
+
+	public static final DefaultBeanNameGenerator INSTANCE = new DefaultBeanNameGenerator();
+
+	@Override
+	public String generateBeanName(BeanDefinition definition, BeanDefinitionRegistry registry) {
+		return BeanDefinitionReaderUtils.generateBeanName(definition, registry);
+	}
+}
+</code></pre>
+</li>
+<li>
+<p><code>AnnotationBeanNameGenerator</code>：基于注解扫描的 BeanNameGenerator 实现，起始于 Spring Framework 2.5，关联的官方文档：</p>
+</li>
+</ul>
+<blockquote>
+<p>With component scanning in the classpath, Spring generates bean names for unnamed components, following the rules described earlier: essentially, taking the simple class name and turning its initial character to lower-case. However, in the (unusual) special case when there is more than one character and both the first and second characters are upper case, the original casing gets preserved. These are the same rules as defined by java.beans.Introspector.decapitalize (which Spring uses here).</p>
+</blockquote>
+<h2 id="spring-bean的别名">Spring Bean的别名</h2>
+<p>Bean 别名（Alias）的价值</p>
+<ul>
+<li>复用现有的 <code>BeanDefinition</code></li>
+<li>更具有场景化的命名方法，比如：</li>
+</ul>
+<pre><code>&lt;alias name=&quot;myApp-dataSource&quot; alias=&quot;subsystemA-dataSource&quot;/&gt; 
+&lt;alias name=&quot;myApp-dataSource&quot; alias=&quot;subsystemB-dataSource&quot;/&gt;
+</code></pre>
+<h2 id="注册spring-bean">注册Spring Bean</h2>
+<h3 id="beandefinition-注册">BeanDefinition 注册</h3>
+<ul>
+<li>
+<p>XML 配置元信息</p>
+<ul>
+<li><code>&lt;bean name=”...” ... /&gt;</code></li>
+</ul>
+</li>
+<li>
+<p>Java 注解配置元信息</p>
+<ul>
+<li>
+<p><code>@Bean</code></p>
+<pre><code> @Bean(name = {&quot;xxx&quot;,&quot;yyy&quot;})
+</code></pre>
+</li>
+<li>
+<p><code>@Component</code></p>
+</li>
+<li>
+<p><code>@Import</code></p>
+</li>
+</ul>
+</li>
+<li>
+<p>Java API 配置元信息</p>
+<ul>
+<li>
+<p>命名方式：<code>BeanDefinitionRegistry#registerBeanDefinition(String,BeanDefinition)</code></p>
+<pre><code class="language-java">public static void registerBeanDefinition(BeanDefinitionRegistry registry,String beanName,Class&lt;?&gt; beanClass){
+        BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(beanClass);
+        beanDefinitionBuilder.addPropertyValue(&quot;id&quot;,2L).addPropertyValue(&quot;name&quot;,&quot;yy&quot;);
+        registry.registerBeanDefinition(beanName,beanDefinitionBuilder.getBeanDefinition());
+}
+</code></pre>
+</li>
+<li>
+<p>非命名方式：<code>BeanDefinitionReaderUtils#registerWithGeneratedName(AbstractBeanDefinition,Be anDefinitionRegistry)</code></p>
+<pre><code>public static void registerBeanDeinition(BeanDefinitionRegistry registry,Class&lt;?&gt; beanClass){
+        BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(beanClass);
+        	   beanDefinitionBuilder.addPropertyValue(&quot;id&quot;,2L).addPropertyValue(&quot;name&quot;,&quot;yy&quot;);
+        BeanDefinitionReaderUtils.registerWithGeneratedName(beanDefinitionBuilder.getBeanDefinition(),registry);
+}
+</code></pre>
+</li>
+<li>
+<p>配置类方式：<code>AnnotatedBeanDefinitionReader#register(Class...)</code></p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="外部单例对象注册">外部单例对象注册</h3>
+<ul>
+<li>Java API 配置元信息
+<ul>
+<li><code>SingletonBeanRegistry#registerSingleton</code></li>
+</ul>
+</li>
+</ul>
+<h2 id="实例化-spring-bean">实例化 Spring Bean</h2>
+<ul>
+<li>Bean 实例化（Instantiation）
+<ul>
+<li>常规方式
+<ul>
+<li>通过构造器（配置元信息：XML、Java 注解和 Java API ）</li>
+<li>通过静态工厂方法（配置元信息：XML 和 Java API ）</li>
+<li>通过 Bean 工厂方法（配置元信息：XML和 Java API ）</li>
+<li>通过 FactoryBean（配置元信息：XML、Java 注解和 Java API ）</li>
+</ul>
+</li>
+<li>特殊方式
+<ul>
+<li>通过 <code>ServiceLoaderFactoryBean</code>（配置元信息：XML、Java 注解和 Java API ）</li>
+<li>通过 <code>AutowireCapableBeanFactory#createBean(java.lang.Class, int, boolean)</code></li>
+<li>通过 <code>BeanDefinitionRegistry#registerBeanDefinition(String, BeanDefinition)</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="初始化-spring-bean">初始化 Spring Bean</h2>
+<h3 id="bean-初始化initialization">Bean 初始化（Initialization）</h3>
+<ul>
+<li><code>@PostConstruct</code> 标注方法</li>
+<li>实现 InitializingBean 接口的 <code>afterPropertiesSet()</code> 方法</li>
+<li>自定义初始化方法
+<ul>
+<li>XML 配置：<code>&lt;bean init-method=”init” ... /&gt;</code></li>
+<li>Java 注解：<code>@Bean(initMethod=”init”)</code></li>
+<li>Java API：<code>AbstractBeanDefinition#setInitMethodName(String)</code></li>
+</ul>
+</li>
+</ul>
+<p>这些方法的执行顺序是怎样？</p>
+<blockquote>
+<p><code>@PostConstruct</code> -&gt; <code>afterPropertiesSet()</code> -&gt; 自定义初始化方法</p>
+</blockquote>
+<h2 id="延迟初始化-spring-bean">延迟初始化 Spring Bean</h2>
+<h3 id="bean-延迟初始化lazy-initialization">Bean 延迟初始化（Lazy Initialization）</h3>
+<ul>
+<li>XML 配置：<code>&lt;bean lazy-init=”true” ... /&gt;</code></li>
+<li>Java 注解：<code>@Lazy(true)</code></li>
+</ul>
+<p>非延时加载在Spring应用上下文启动完成后，被初始化；延时加载在Spring上下文启动后再加载。</p>
+<pre><code>//refresh()
+// Instantiate all remaining (non-lazy-init) singletons.
+finishBeanFactoryInitialization(beanFactory);
+</code></pre>
+<h2 id="销毁-spring-bean">销毁 Spring Bean</h2>
+<ul>
+<li>
+<p>@PreDestroy 标注方法</p>
+</li>
+<li>
+<p>实现 DisposableBean 接口的 destroy() 方法</p>
+</li>
+<li>
+<p>自定义销毁方法</p>
+<ul>
+<li>XML 配置：&lt;bean destroy=”destroy” ... /&gt;</li>
+<li>Java 注解：@Bean(destroy=”destroy”)</li>
+<li>Java API：AbstractBeanDefinition#setDestroyMethodName(String)</li>
+</ul>
+<blockquote>
+<p>@PreDestroy -&gt; DisposableBean# destroy() -&gt; 自定义销毁方法</p>
+</blockquote>
+</li>
+</ul>
+<h2 id="垃圾回收-spring-bean">垃圾回收 Spring Bean</h2>
+<ul>
+<li>关闭 Spring 容器（应用上下文）</li>
+<li>执行 GC</li>
+<li>Spring Bean覆盖的finalize()方法被回调</li>
+</ul>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#%E5%AE%9A%E4%B9%89spring-bean">定义Spring Bean</a></li>
+<li><a href="#beandefinition%E5%85%83%E4%BF%A1%E6%81%AF">BeanDefinition元信息</a></li>
+<li><a href="#%E5%91%BD%E5%90%8Dspring-bean">命名Spring Bean</a>
+<ul>
+<li><a href="#bean-%E7%9A%84%E5%90%8D%E7%A7%B0">Bean 的名称</a></li>
+<li><a href="#bean-%E5%90%8D%E7%A7%B0%E7%94%9F%E6%88%90%E5%99%A8beannamegenerator">Bean 名称生成器（BeanNameGenerator）</a></li>
+</ul>
+</li>
+<li><a href="#spring-bean%E7%9A%84%E5%88%AB%E5%90%8D">Spring Bean的别名</a></li>
+<li><a href="#%E6%B3%A8%E5%86%8Cspring-bean">注册Spring Bean</a>
+<ul>
+<li><a href="#beandefinition-%E6%B3%A8%E5%86%8C">BeanDefinition 注册</a></li>
+<li><a href="#%E5%A4%96%E9%83%A8%E5%8D%95%E4%BE%8B%E5%AF%B9%E8%B1%A1%E6%B3%A8%E5%86%8C">外部单例对象注册</a></li>
+</ul>
+</li>
+<li><a href="#%E5%AE%9E%E4%BE%8B%E5%8C%96-spring-bean">实例化 Spring Bean</a></li>
+<li><a href="#%E5%88%9D%E5%A7%8B%E5%8C%96-spring-bean">初始化 Spring Bean</a>
+<ul>
+<li><a href="#bean-%E5%88%9D%E5%A7%8B%E5%8C%96initialization">Bean 初始化（Initialization）</a></li>
+</ul>
+</li>
+<li><a href="#%E5%BB%B6%E8%BF%9F%E5%88%9D%E5%A7%8B%E5%8C%96-spring-bean">延迟初始化 Spring Bean</a>
+<ul>
+<li><a href="#bean-%E5%BB%B6%E8%BF%9F%E5%88%9D%E5%A7%8B%E5%8C%96lazy-initialization">Bean 延迟初始化（Lazy Initialization）</a></li>
+</ul>
+</li>
+<li><a href="#%E9%94%80%E6%AF%81-spring-bean">销毁 Spring Bean</a></li>
+<li><a href="#%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6-spring-bean">垃圾回收 Spring Bean</a></li>
+</ul>
+</li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://k-21d.github.io/post/spring-ioc-rong-qi-gai-shu/">
+              <h3 class="post-title">
+                Spring IoC容器概述
+              </h3>
+            </a>
+          </div>
+        
+
+        
+
+        <div class="site-footer">
+  Powered by k21d | 
+  <a class="rss" href="https://k-21d.github.io/atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+
+  let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+  // This should probably be throttled.
+  // Especially because it triggers during smooth scrolling.
+  // https://lodash.com/docs/4.17.10#throttle
+  // You could do like...
+  // window.addEventListener("scroll", () => {
+  //    _.throttle(doThatStuff, 100);
+  // });
+  // Only not doing it here to keep this Pen dependency-free.
+
+  window.addEventListener("scroll", event => {
+    let fromTop = window.scrollY;
+
+    mainNavLinks.forEach((link, index) => {
+      let section = document.getElementById(decodeURI(link.hash).substring(1));
+      let nextSection = null
+      if (mainNavLinks[index + 1]) {
+        nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+      }
+      if (section.offsetTop <= fromTop) {
+        if (nextSection) {
+          if (nextSection.offsetTop > fromTop) {
+            link.classList.add("current");
+          } else {
+            link.classList.remove("current");    
+          }
+        } else {
+          link.classList.add("current");
+        }
+      } else {
+        link.classList.remove("current");
+      }
+    });
+  });
+
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

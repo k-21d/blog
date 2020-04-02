@@ -1,0 +1,380 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>重新认识IoC | 学习博客</title>
+<meta name="description" content="Java Blog" />
+<link rel="shortcut icon" href="https://k-21d.github.io/favicon.ico?v=1585819829763">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://k-21d.github.io/styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://k-21d.github.io">
+  <img class="avatar" src="https://k-21d.github.io/images/avatar.png?v=1585819829763" alt="">
+  </a>
+  <h1 class="site-title">
+    学习博客
+  </h1>
+  <p class="site-description">
+    Java Blog
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="https://k-21d.github.io/archives" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              重新认识IoC
+            </h2>
+            <div class="post-info">
+              <span>
+                2020-01-15
+              </span>
+              <span>
+                8 min read
+              </span>
+              
+                <a href="https://k-21d.github.io/tag/TNP4BReFW/" class="post-tag">
+                  # spring
+                </a>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content">
+                <h1 id="ioc-发展简介">IoC 发展简介</h1>
+<h2 id="什么是-ioc">什么是 IoC ？</h2>
+<blockquote>
+<p>In software engineering, inversion of control (IoC) is a programming principle. IoC inverts the flow of<br>
+control as compared to traditional control flow. In IoC, custom-written portions of a computer program receive the flow of control from a generic framework. A software architecture with this design inverts control as compared to traditional procedural programming: in traditional programming, the custom code that expresses the purpose of the program calls into reusable libraries to take care of generic tasks, but with inversion of control, it is the framework that calls into the custom, or task-specific, code.<br>
+https://en.wikipedia.org/wiki/Inversion_of_control</p>
+</blockquote>
+<h2 id="ioc-的简史">IoC 的简史</h2>
+<ul>
+<li>1983年，Richard E. Sweet 在《The Mesa Programming Environment》中提出“Hollywood<br>
+Principle”（好莱坞原则）</li>
+<li>1988年，Ralph E. Johnson &amp; Brian Foote 在《Designing Reusable Classes》中提出“Inversion<br>
+of control”（控制反转）</li>
+<li>1996年，Michael Mattsson 在《Object-Oriented Frameworks, A survey of methodological<br>
+issues》中将“Inversion of control”命名为 “Hollywood principle”</li>
+<li>2004年，Martin Fowler 在《Inversion of Control Containers and the Dependency Injection<br>
+pattern》中提出了自己对 IoC 以及 DI 的理解</li>
+<li>2005年，Martin Fowler 在 《InversionOfControl》对 IoC 做出进一步的说明</li>
+</ul>
+<h1 id="ioc-主要实现策略">IoC 主要实现策略</h1>
+<h2 id="维基百科">维基百科</h2>
+<ul>
+<li>Using a service locator pattern</li>
+<li>Using dependency injection, for example
+<ul>
+<li>Constructor injection</li>
+<li>Parameter injection</li>
+<li>Setter injection</li>
+<li>Interface injection</li>
+</ul>
+</li>
+<li>Using a contextualized lookup</li>
+<li>Using template method design pattern</li>
+<li>Using strategy design pattern</li>
+</ul>
+<h2 id="expert-one-on-onetm-j2eetm-development-without-ejbtm">《Expert One-on-One™ J2EE™ Development without EJB™》</h2>
+<h3 id="dependency-lookup">Dependency Lookup</h3>
+<blockquote>
+<p>The container provides callbacks to components, and a lookup context. This is<br>
+the EJB and Apache Avalon approach. It leaves the onus on each component to use container APIs to<br>
+look up resources and collaborators. The Inversion of Control is limited to the container invoking<br>
+callback methods that application code can use to obtain resources.</p>
+</blockquote>
+<h3 id="dependency-injection">Dependency Injection</h3>
+<blockquote>
+<p>Components do no look up; they provide plain Java methods enabling the<br>
+container to resolve dependencies. The container is wholly responsible for wiring up components,<br>
+passing resolved objects in to JavaBean properties or constructors. Use of JavaBean properties is<br>
+called Setter Injection; use of constructor arguments is called Constructor Injection.</p>
+</blockquote>
+<h1 id="ioc-容器的职责">IoC 容器的职责</h1>
+<ul>
+<li>依赖处理
+<ul>
+<li>依赖查找</li>
+<li>依赖注入</li>
+</ul>
+</li>
+<li>生命周期管理
+<ul>
+<li>容器</li>
+<li>托管的资源（Java Beans 或其他资源）</li>
+</ul>
+</li>
+<li>配置
+<ul>
+<li>容器</li>
+<li>外部化配置</li>
+<li>托管的资源（Java Beans 或其他资源）</li>
+</ul>
+</li>
+</ul>
+<h1 id="传统-ioc-容器实现">传统 IoC 容器实现</h1>
+<ul>
+<li>Java SE
+<ul>
+<li>Java Beans</li>
+<li>Java ServiceLoader SPI</li>
+<li>JNDI（Java Naming and Directory Interface）</li>
+</ul>
+</li>
+<li>Java EE
+<ul>
+<li>EJB（Enterprise Java Beans）</li>
+<li>Servlet</li>
+</ul>
+</li>
+<li>开源
+<ul>
+<li>Apache Avalon（http://avalon.apache.org/closed.html）</li>
+<li>PicoContainer（http://picocontainer.com/）</li>
+<li>Google Guice（https://github.com/google/guice）</li>
+<li>Spring Framework（https://spring.io/projects/spring-framework）</li>
+</ul>
+</li>
+</ul>
+<h2 id="java-beans-作为-ioc-容器">Java Beans 作为 IoC 容器</h2>
+<ul>
+<li>特性
+<ul>
+<li>依赖查找</li>
+<li>生命周期管理</li>
+<li>配置元信息</li>
+<li>事件</li>
+<li>自定义</li>
+<li>资源管理</li>
+<li>持久化</li>
+</ul>
+</li>
+<li>规范
+<ul>
+<li>JavaBeans：https://www.oracle.com/technetwork/java/javase/tech/index-jsp-138795.html</li>
+<li>BeanContext：https://docs.oracle.com/javase/8/docs/technotes/guides/beans/spec/beancontext.html</li>
+</ul>
+</li>
+</ul>
+<h1 id="轻量级-ioc-容器">轻量级 IoC 容器</h1>
+<ul>
+<li>《Expert One-on-One™ J2EE™ Development without EJB™》认为轻量级容器的特征：
+<ul>
+<li>A container that can manage application code.</li>
+<li>A container that is quick to start up.</li>
+<li>A container that doesn't require any special deployment steps to deploy objects within it.</li>
+<li>A container that has such a light footprint and minimal API dependencies that it can be run in a variety of environments.</li>
+<li>A container that sets the bar for adding a managed object so low in terms of deployment effort and performance<br>
+overhead that it's possible to deploy and manage fine-grained objects, as well as coarse-grained components.</li>
+</ul>
+</li>
+<li>《Expert One-on-One™ J2EE™ Development without EJB™》认为轻量级容器的好处：
+<ul>
+<li>Escaping the monolithic container</li>
+<li>Maximizing code reusability</li>
+<li>Greater object orientation</li>
+<li>Greater productivity</li>
+<li>Better testability</li>
+</ul>
+</li>
+</ul>
+<h1 id="构造器注入-vs-setter-注入">构造器注入 VS. Setter 注入</h1>
+<p>Spring Framework 对构造器注入与 Setter 的论点：</p>
+<blockquote>
+<p>“The Spring team generally advocates constructor injection, as it lets you implement application components as<br>
+immutable objects and ensures that required dependencies are not null. Furthermore, constructor-injected components<br>
+are always returned to the client (calling) code in a fully initialized state. As a side note, a large number of constructor<br>
+arguments is a bad code smell, implying that the class likely has too many responsibilities and should be refactored to<br>
+better address proper separation of concerns.</p>
+</blockquote>
+<blockquote>
+<p>Setter injection should primarily only be used for optional dependencies that can be assigned reasonable default values<br>
+within the class. Otherwise, not-null checks must be performed everywhere the code uses the dependency. One benefit of<br>
+setter injection is that setter methods make objects of that class amenable to reconfiguration or re-injection later.<br>
+Management through JMX MBeans is therefore a compelling use case for setter injection.”</p>
+</blockquote>
+<p>《Expert One-on-One™ J2EE™ Development without EJB™》认为 Setter 注入的优点：</p>
+<ul>
+<li>JavaBean properties are well supported in IDEs.</li>
+<li>JavaBean properties are self-documenting.</li>
+<li>JavaBean properties are inherited by subclasses without the need for any code.</li>
+<li>It's possible to use the standard JavaBeans property-editor machinery for type conversions if necessary.</li>
+<li>Many existing JavaBeans can be used within a JavaBean-oriented IoC container without modification.</li>
+<li>If there is a corresponding getter for each setter (making the property readable, as well as writable), it is possible to ask<br>
+the component for its current configuration state. This is particularly useful if we want to persist that state: for example,<br>
+in an XML form or in a database. With Constructor Injection, there's no way to find the current state.</li>
+<li>Setter Injection works well for objects that have default values, meaning that not all properties need to be supplied at<br>
+runtime.</li>
+</ul>
+<p>《Expert One-on-One™ J2EE™ Development without EJB™》认为 Setter 注入的缺点：</p>
+<blockquote>
+<p>The order in which setters are called is not expressed in any contract. Thus, we sometimes need to invoke a<br>
+method after the last setter has been called to initialize the component. Spring provides the<br>
+org.springframework.beans.factory.InitializingBean interface for this; it also provides the ability to invoke an<br>
+arbitrary init method. However, this contract must be documented to ensure correct use outside a container.Not all the necessary setters may have been called before use. The object can thus be left partially configured.</p>
+</blockquote>
+<p>《Expert One-on-One™ J2EE™ Development without EJB™》认为构造器注入的优点：</p>
+<blockquote>
+<p>Each managed object is guaranteed to be in a consistent state—fully configured—before it can be invoked in<br>
+any business methods. This is the primary motivation of Constructor Injection. (However, it is possible to achieve<br>
+the same result with JavaBeans via dependency checking, as Spring can optionally perform.) There's no need for<br>
+initialization methods.</p>
+</blockquote>
+<blockquote>
+<p>There may be slightly less code than results from the use of multiple JavaBean methods, although will be no<br>
+difference in complexity.</p>
+</blockquote>
+<p>《Expert One-on-One™ J2EE™ Development without EJB™》认为构造器注入的缺点：</p>
+<ul>
+<li>Although also a Java-language feature, multi-argument constructors are probably less common in existing code than<br>
+use of JavaBean properties.</li>
+<li>Java constructor arguments don't have names visible by introspection.</li>
+<li>Constructor argument lists are less well supported by IDEs than JavaBean setter methods.</li>
+<li>Long constructor argument lists and large constructor bodies can become unwieldy.</li>
+<li>Concrete inheritance can become problematic.</li>
+<li>Poor support for optional properties, compared to JavaBeans</li>
+<li>Unit testing can be slightly more difficult</li>
+<li>When collaborators are passed in on object construction, it becomes impossible to change the reference held in the<br>
+object.</li>
+</ul>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li><a href="#ioc-%E5%8F%91%E5%B1%95%E7%AE%80%E4%BB%8B">IoC 发展简介</a>
+<ul>
+<li><a href="#%E4%BB%80%E4%B9%88%E6%98%AF-ioc">什么是 IoC ？</a></li>
+<li><a href="#ioc-%E7%9A%84%E7%AE%80%E5%8F%B2">IoC 的简史</a></li>
+</ul>
+</li>
+<li><a href="#ioc-%E4%B8%BB%E8%A6%81%E5%AE%9E%E7%8E%B0%E7%AD%96%E7%95%A5">IoC 主要实现策略</a>
+<ul>
+<li><a href="#%E7%BB%B4%E5%9F%BA%E7%99%BE%E7%A7%91">维基百科</a></li>
+<li><a href="#expert-one-on-onetm-j2eetm-development-without-ejbtm">《Expert One-on-One™ J2EE™ Development without EJB™》</a>
+<ul>
+<li><a href="#dependency-lookup">Dependency Lookup</a></li>
+<li><a href="#dependency-injection">Dependency Injection</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#ioc-%E5%AE%B9%E5%99%A8%E7%9A%84%E8%81%8C%E8%B4%A3">IoC 容器的职责</a></li>
+<li><a href="#%E4%BC%A0%E7%BB%9F-ioc-%E5%AE%B9%E5%99%A8%E5%AE%9E%E7%8E%B0">传统 IoC 容器实现</a>
+<ul>
+<li><a href="#java-beans-%E4%BD%9C%E4%B8%BA-ioc-%E5%AE%B9%E5%99%A8">Java Beans 作为 IoC 容器</a></li>
+</ul>
+</li>
+<li><a href="#%E8%BD%BB%E9%87%8F%E7%BA%A7-ioc-%E5%AE%B9%E5%99%A8">轻量级 IoC 容器</a></li>
+<li><a href="#%E6%9E%84%E9%80%A0%E5%99%A8%E6%B3%A8%E5%85%A5-vs-setter-%E6%B3%A8%E5%85%A5">构造器注入 VS. Setter 注入</a></li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+
+        
+
+        <div class="site-footer">
+  Powered by k21d | 
+  <a class="rss" href="https://k-21d.github.io/atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+
+  let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+  // This should probably be throttled.
+  // Especially because it triggers during smooth scrolling.
+  // https://lodash.com/docs/4.17.10#throttle
+  // You could do like...
+  // window.addEventListener("scroll", () => {
+  //    _.throttle(doThatStuff, 100);
+  // });
+  // Only not doing it here to keep this Pen dependency-free.
+
+  window.addEventListener("scroll", event => {
+    let fromTop = window.scrollY;
+
+    mainNavLinks.forEach((link, index) => {
+      let section = document.getElementById(decodeURI(link.hash).substring(1));
+      let nextSection = null
+      if (mainNavLinks[index + 1]) {
+        nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+      }
+      if (section.offsetTop <= fromTop) {
+        if (nextSection) {
+          if (nextSection.offsetTop > fromTop) {
+            link.classList.add("current");
+          } else {
+            link.classList.remove("current");    
+          }
+        } else {
+          link.classList.add("current");
+        }
+      } else {
+        link.classList.remove("current");
+      }
+    });
+  });
+
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

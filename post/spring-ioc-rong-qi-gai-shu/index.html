@@ -1,0 +1,462 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Spring IoC容器概述 | 学习博客</title>
+<meta name="description" content="Java Blog" />
+<link rel="shortcut icon" href="https://k-21d.github.io/favicon.ico?v=1585819829763">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://k-21d.github.io/styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://k-21d.github.io">
+  <img class="avatar" src="https://k-21d.github.io/images/avatar.png?v=1585819829763" alt="">
+  </a>
+  <h1 class="site-title">
+    学习博客
+  </h1>
+  <p class="site-description">
+    Java Blog
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="https://k-21d.github.io/archives" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              Spring IoC容器概述
+            </h2>
+            <div class="post-info">
+              <span>
+                2020-01-20
+              </span>
+              <span>
+                5 min read
+              </span>
+              
+                <a href="https://k-21d.github.io/tag/TNP4BReFW/" class="post-tag">
+                  # spring
+                </a>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content">
+                <h2 id="spring-ioc依赖查找">Spring IoC依赖查找</h2>
+<h3 id="根据bean名称查找">根据Bean名称查找</h3>
+<h4 id="实时查找">实时查找</h4>
+<p><code>User user = (User) beanFactory.getBean(&quot;user&quot;);</code></p>
+<h4 id="延时查找">延时查找</h4>
+<pre><code>ObjectFactory&lt;User&gt; objectFactory = (ObjectFactory&lt;User&gt;) beanFactory.getBean(&quot;objectFactory&quot;);
+User user = objectFactory.getObject();
+</code></pre>
+<h3 id="根据bean类型查找">根据Bean类型查找</h3>
+<h4 id="单个bean对象">单个Bean对象</h4>
+<p><code>User user = beanFactory.getBean(User.class);</code></p>
+<h4 id="集合bean对象">集合Bean对象</h4>
+<pre><code>if (beanFactory instanceof ListableBeanFactory){
+    ListableBeanFactory listableBeanFactory = (ListableBeanFactory) beanFactory;
+    Map&lt;String, User&gt; users = listableBeanFactory.getBeansOfType(User.class);
+}
+</code></pre>
+<h3 id="根据bean名称类型查找">根据Bean名称+类型查找</h3>
+<h3 id="根据java注解查找">根据Java注解查找</h3>
+<ul>
+<li>单个Bean对象</li>
+<li>集合Bean对象</li>
+</ul>
+<pre><code class="language-Java">private static void lookupByAnnotation(BeanFactory beanFactory) {
+    if (beanFactory instanceof ListableBeanFactory) {
+        ListableBeanFactory listableBeanFactory = (ListableBeanFactory) beanFactory;
+        Map&lt;String, Object&gt; beansWithAnnotation = listableBeanFactory.getBeansWithAnnotation(Super.class);
+        System.out.println(&quot;@Super:&quot;+beansWithAnnotation);
+    }
+}
+</code></pre>
+<h2 id="spring-ioc依赖注入">Spring IoC依赖注入</h2>
+<h3 id="根据bean名称注入">根据Bean名称注入</h3>
+<h3 id="根据bean类型注入">根据Bean类型注入</h3>
+<ul>
+<li>单个Bean对象</li>
+<li>集合Bean对象</li>
+</ul>
+<h3 id="注入容器内建bean对象">注入容器内建Bean对象</h3>
+<h3 id="注入非bean对象">注入非Bean对象</h3>
+<h3 id="注入类型">注入类型</h3>
+<ul>
+<li>实时注入</li>
+<li>延时注入</li>
+</ul>
+<h2 id="spring-ioc依赖来源">Spring IoC依赖来源</h2>
+<pre><code>public class UserRepository {
+    private Collection&lt;User&gt; users; //自定义bean
+    private BeanFactory beanFactory; //内建非Bean对象（依赖）
+    private ObjectFactory&lt;ApplicationContext&gt; objectFactory;
+    public BeanFactory getBeanFactory() {
+        return beanFactory;
+    }
+    public void setBeanFactory(BeanFactory beanFactory) {
+        this.beanFactory = beanFactory;
+    }
+    public ObjectFactory&lt;ApplicationContext&gt; getObjectFactory() {
+        return objectFactory;
+    }
+    public void setObjectFactory(ObjectFactory&lt;ApplicationContext&gt; objectFactory) {
+        this.objectFactory = objectFactory;
+    }
+    public Collection&lt;User&gt; getUsers() {
+        return users;
+    }
+    public void setUsers(Collection&lt;User&gt; users) {
+        this.users = users;
+    }
+}
+</code></pre>
+<h3 id="自定义bean">自定义Bean</h3>
+<pre><code>UserRepository userRepository = beanFactory.getBean(&quot;userRepository&quot;, UserRepository.class);
+</code></pre>
+<h3 id="依赖注入内建依赖">依赖注入（内建依赖）</h3>
+<p><code>userRepository.getBeanFactory();</code></p>
+<h3 id="容器内建依赖">容器内建依赖</h3>
+<p><code>Environment environment = beanFactory.getBean(Environment.class);</code></p>
+<h2 id="spring-ioc配置元信息">Spring Ioc配置元信息</h2>
+<h3 id="bean-定义配置">Bean 定义配置</h3>
+<ul>
+<li>基于XMl文件</li>
+<li>基于Properties文件</li>
+<li>基于Java注解</li>
+<li>基于Java API</li>
+</ul>
+<h3 id="ioc容器配置">IoC容器配置</h3>
+<ul>
+<li>基于XMl文件</li>
+<li>基于Java注解</li>
+<li>基于Java API</li>
+</ul>
+<h3 id="外部化属性配置">外部化属性配置</h3>
+<ul>
+<li>基于Java注解</li>
+</ul>
+<h2 id="spring-ioc容器">Spring IoC容器</h2>
+<ul>
+<li>BeanFactory和ApplicationContext</li>
+</ul>
+<h2 id="spring-应用上下文">Spring 应用上下文</h2>
+<ul>
+<li>ApplicaitonContext除了IoC容器角色，还有提供：
+<ul>
+<li>面向切面</li>
+<li>配置元信息</li>
+<li>资源管理</li>
+<li>事件</li>
+<li>国际化</li>
+<li>注解</li>
+<li>Environment抽象</li>
+</ul>
+</li>
+</ul>
+<p><a href="https://docs.spring.io/spring/docs/5.2.2.RELEASE/spring-framework-reference/core.html">spring doc</a></p>
+<h2 id="使用spring-ioc容器">使用Spring IoC容器</h2>
+<ul>
+<li>BeanFactory是Spring底层Ioc容器</li>
+</ul>
+<pre><code>//创建BeanFactory容器
+DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory);
+//XML配置文件 ClassPath路径
+String location = &quot;classpath:/META-INF/dependency-lookup-context.xml&quot;;
+//加载配置
+reader.loadBeanDefinitions(location);
+</code></pre>
+<ul>
+<li>ApplicaitonContext事具备应用特性的BeanFactory超集</li>
+</ul>
+<pre><code>//创建BeanFactory容器
+AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext();
+//将当前类作为配置类
+applicationContext.register(AnnotationApplicationConetxtAsIoCContainerDemo.class);
+//启动应用上下文
+applicationContext.refresh();
+</code></pre>
+<h2 id="spring-ioc容器生命周期">Spring IoC容器生命周期</h2>
+<ul>
+<li>启动<pre><code>	@Override
+	public void refresh() throws BeansException, IllegalStateException {
+		synchronized (this.startupShutdownMonitor) {
+			// Prepare this context for refreshing.
+			prepareRefresh();
+
+			// Tell the subclass to refresh the internal bean factory.
+			ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
+
+			// Prepare the bean factory for use in this context.
+			prepareBeanFactory(beanFactory);
+
+			try {
+				// Allows post-processing of the bean factory in context subclasses.
+				postProcessBeanFactory(beanFactory);
+
+				// Invoke factory processors registered as beans in the context.
+				invokeBeanFactoryPostProcessors(beanFactory);
+
+				// Register bean processors that intercept bean creation.
+				registerBeanPostProcessors(beanFactory);
+
+				// Initialize message source for this context.
+				initMessageSource();
+
+				// Initialize event multicaster for this context.
+				initApplicationEventMulticaster();
+
+				// Initialize other special beans in specific context subclasses.
+				onRefresh();
+
+				// Check for listener beans and register them.
+				registerListeners();
+
+				// Instantiate all remaining (non-lazy-init) singletons.
+				finishBeanFactoryInitialization(beanFactory);
+
+				// Last step: publish corresponding event.
+				finishRefresh();
+			}
+
+			catch (BeansException ex) {
+				if (logger.isWarnEnabled()) {
+					logger.warn(&quot;Exception encountered during context initialization - &quot; +
+							&quot;cancelling refresh attempt: &quot; + ex);
+				}
+
+				// Destroy already created singletons to avoid dangling resources.
+				destroyBeans();
+
+				// Reset 'active' flag.
+				cancelRefresh(ex);
+
+				// Propagate exception to caller.
+				throw ex;
+			}
+
+			finally {
+				// Reset common introspection caches in Spring's core, since we
+				// might not ever need metadata for singleton beans anymore...
+				resetCommonCaches();
+			}
+		}
+	}
+</code></pre>
+</li>
+<li>运行</li>
+<li>停止<pre><code>	@Override
+	public void close() {
+		synchronized (this.startupShutdownMonitor) {
+			doClose();
+			// If we registered a JVM shutdown hook, we don't need it anymore now:
+			// We've already explicitly closed the context.
+			if (this.shutdownHook != null) {
+				try {
+					Runtime.getRuntime().removeShutdownHook(this.shutdownHook);
+				}
+				catch (IllegalStateException ex) {
+					// ignore - VM is already shutting down
+				}
+			}
+		}
+	}
+</code></pre>
+</li>
+</ul>
+<h2 id="beanfactory和factorybean">BeanFactory和FactoryBean</h2>
+<pre><code>public interface FactoryBean&lt;T&gt; {
+
+	String OBJECT_TYPE_ATTRIBUTE = &quot;factoryBeanObjectType&quot;;
+	
+	@Nullable
+	T getObject() throws Exception;
+
+	@Nullable
+	Class&lt;?&gt; getObjectType();
+
+	default boolean isSingleton() {
+		return true;
+	}
+}
+
+</code></pre>
+<ul>
+<li>BeanFactory是IoC底层容器</li>
+<li>FactoryBean 是 创建 Bean 的一种方式，帮助实现复杂的初始化逻辑</li>
+</ul>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#spring-ioc%E4%BE%9D%E8%B5%96%E6%9F%A5%E6%89%BE">Spring IoC依赖查找</a>
+<ul>
+<li><a href="#%E6%A0%B9%E6%8D%AEbean%E5%90%8D%E7%A7%B0%E6%9F%A5%E6%89%BE">根据Bean名称查找</a>
+<ul>
+<li><a href="#%E5%AE%9E%E6%97%B6%E6%9F%A5%E6%89%BE">实时查找</a></li>
+<li><a href="#%E5%BB%B6%E6%97%B6%E6%9F%A5%E6%89%BE">延时查找</a></li>
+</ul>
+</li>
+<li><a href="#%E6%A0%B9%E6%8D%AEbean%E7%B1%BB%E5%9E%8B%E6%9F%A5%E6%89%BE">根据Bean类型查找</a>
+<ul>
+<li><a href="#%E5%8D%95%E4%B8%AAbean%E5%AF%B9%E8%B1%A1">单个Bean对象</a></li>
+<li><a href="#%E9%9B%86%E5%90%88bean%E5%AF%B9%E8%B1%A1">集合Bean对象</a></li>
+</ul>
+</li>
+<li><a href="#%E6%A0%B9%E6%8D%AEbean%E5%90%8D%E7%A7%B0%E7%B1%BB%E5%9E%8B%E6%9F%A5%E6%89%BE">根据Bean名称+类型查找</a></li>
+<li><a href="#%E6%A0%B9%E6%8D%AEjava%E6%B3%A8%E8%A7%A3%E6%9F%A5%E6%89%BE">根据Java注解查找</a></li>
+</ul>
+</li>
+<li><a href="#spring-ioc%E4%BE%9D%E8%B5%96%E6%B3%A8%E5%85%A5">Spring IoC依赖注入</a>
+<ul>
+<li><a href="#%E6%A0%B9%E6%8D%AEbean%E5%90%8D%E7%A7%B0%E6%B3%A8%E5%85%A5">根据Bean名称注入</a></li>
+<li><a href="#%E6%A0%B9%E6%8D%AEbean%E7%B1%BB%E5%9E%8B%E6%B3%A8%E5%85%A5">根据Bean类型注入</a></li>
+<li><a href="#%E6%B3%A8%E5%85%A5%E5%AE%B9%E5%99%A8%E5%86%85%E5%BB%BAbean%E5%AF%B9%E8%B1%A1">注入容器内建Bean对象</a></li>
+<li><a href="#%E6%B3%A8%E5%85%A5%E9%9D%9Ebean%E5%AF%B9%E8%B1%A1">注入非Bean对象</a></li>
+<li><a href="#%E6%B3%A8%E5%85%A5%E7%B1%BB%E5%9E%8B">注入类型</a></li>
+</ul>
+</li>
+<li><a href="#spring-ioc%E4%BE%9D%E8%B5%96%E6%9D%A5%E6%BA%90">Spring IoC依赖来源</a>
+<ul>
+<li><a href="#%E8%87%AA%E5%AE%9A%E4%B9%89bean">自定义Bean</a></li>
+<li><a href="#%E4%BE%9D%E8%B5%96%E6%B3%A8%E5%85%A5%E5%86%85%E5%BB%BA%E4%BE%9D%E8%B5%96">依赖注入（内建依赖）</a></li>
+<li><a href="#%E5%AE%B9%E5%99%A8%E5%86%85%E5%BB%BA%E4%BE%9D%E8%B5%96">容器内建依赖</a></li>
+</ul>
+</li>
+<li><a href="#spring-ioc%E9%85%8D%E7%BD%AE%E5%85%83%E4%BF%A1%E6%81%AF">Spring Ioc配置元信息</a>
+<ul>
+<li><a href="#bean-%E5%AE%9A%E4%B9%89%E9%85%8D%E7%BD%AE">Bean 定义配置</a></li>
+<li><a href="#ioc%E5%AE%B9%E5%99%A8%E9%85%8D%E7%BD%AE">IoC容器配置</a></li>
+<li><a href="#%E5%A4%96%E9%83%A8%E5%8C%96%E5%B1%9E%E6%80%A7%E9%85%8D%E7%BD%AE">外部化属性配置</a></li>
+</ul>
+</li>
+<li><a href="#spring-ioc%E5%AE%B9%E5%99%A8">Spring IoC容器</a></li>
+<li><a href="#spring-%E5%BA%94%E7%94%A8%E4%B8%8A%E4%B8%8B%E6%96%87">Spring 应用上下文</a></li>
+<li><a href="#%E4%BD%BF%E7%94%A8spring-ioc%E5%AE%B9%E5%99%A8">使用Spring IoC容器</a></li>
+<li><a href="#spring-ioc%E5%AE%B9%E5%99%A8%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F">Spring IoC容器生命周期</a></li>
+<li><a href="#beanfactory%E5%92%8Cfactorybean">BeanFactory和FactoryBean</a></li>
+</ul>
+</li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://k-21d.github.io/post/chong-xin-ren-shi-ioc/">
+              <h3 class="post-title">
+                重新认识IoC
+              </h3>
+            </a>
+          </div>
+        
+
+        
+
+        <div class="site-footer">
+  Powered by k21d | 
+  <a class="rss" href="https://k-21d.github.io/atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+
+  let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+  // This should probably be throttled.
+  // Especially because it triggers during smooth scrolling.
+  // https://lodash.com/docs/4.17.10#throttle
+  // You could do like...
+  // window.addEventListener("scroll", () => {
+  //    _.throttle(doThatStuff, 100);
+  // });
+  // Only not doing it here to keep this Pen dependency-free.
+
+  window.addEventListener("scroll", event => {
+    let fromTop = window.scrollY;
+
+    mainNavLinks.forEach((link, index) => {
+      let section = document.getElementById(decodeURI(link.hash).substring(1));
+      let nextSection = null
+      if (mainNavLinks[index + 1]) {
+        nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+      }
+      if (section.offsetTop <= fromTop) {
+        if (nextSection) {
+          if (nextSection.offsetTop > fromTop) {
+            link.classList.add("current");
+          } else {
+            link.classList.remove("current");    
+          }
+        } else {
+          link.classList.add("current");
+        }
+      } else {
+        link.classList.remove("current");
+      }
+    });
+  });
+
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>

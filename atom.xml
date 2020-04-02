@@ -1,0 +1,744 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id>https://k-21d.github.io</id>
+    <title>学习博客</title>
+    <updated>2020-04-02T09:30:59.938Z</updated>
+    <generator>https://github.com/jpmonette/feed</generator>
+    <link rel="alternate" href="https://k-21d.github.io"/>
+    <link rel="self" href="https://k-21d.github.io/atom.xml"/>
+    <subtitle>Java Blog</subtitle>
+    <logo>https://k-21d.github.io/images/avatar.png</logo>
+    <icon>https://k-21d.github.io/favicon.ico</icon>
+    <rights>All rights reserved 2020, 学习博客</rights>
+    <entry>
+        <title type="html"><![CDATA[Spring Bean基础]]></title>
+        <id>https://k-21d.github.io/post/spring-bean-ji-chu/</id>
+        <link href="https://k-21d.github.io/post/spring-bean-ji-chu/">
+        </link>
+        <updated>2020-01-27T12:18:46.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="定义spring-bean">定义Spring Bean</h2>
+<ul>
+<li>什么是BeanDefinition？</li>
+<li>BeanDefinition是Spring Framework中定义Bean的配置元信息接口，包含：
+<ul>
+<li>Bean的类名</li>
+<li>Bean行为配置元素，如作用域、自动绑定的模式、生命周期回调等</li>
+<li>其他Bean引用，又可成为合作者（Collaborators）或者依赖（Dependencies）</li>
+<li>配置设置，比如Bean属性（Properties）</li>
+</ul>
+</li>
+</ul>
+<h2 id="beandefinition元信息">BeanDefinition元信息</h2>
+<table>
+<thead>
+<tr>
+<th>属性 （Property ）</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Class</td>
+<td>Bean 全类名，必须是具体类，不能用抽象类或接口</td>
+</tr>
+<tr>
+<td>Name</td>
+<td>Bean 的名称或者 ID</td>
+</tr>
+<tr>
+<td>Scope</td>
+<td>Bean 的作用域（如：singleton、prototype 等）</td>
+</tr>
+<tr>
+<td>Constructor arguments</td>
+<td>Bean 构造器参数（用于依赖注入）</td>
+</tr>
+<tr>
+<td>Properties</td>
+<td>Bean 属性设置（用于依赖注入）</td>
+</tr>
+<tr>
+<td>Autowiring mode</td>
+<td>Bean 自动绑定模式（如：通过名称 byName）</td>
+</tr>
+<tr>
+<td>Lazy initialization mode</td>
+<td>Bean 延迟初始化模式（延迟和非延迟）</td>
+</tr>
+<tr>
+<td>Initialization method</td>
+<td>Bean 初始化回调方法名称</td>
+</tr>
+<tr>
+<td>Destruction method</td>
+<td>Bean 销毁回调方法名称</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>
+<p>BeanDefinition 构建</p>
+<ul>
+<li>
+<p>通过 <code>BeanDefinitionBuilder</code></p>
+<pre><code>BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(User.class);
+beanDefinitionBuilder.addPropertyValue(&quot;id&quot;,44);
+beanDefinitionBuilder.addPropertyValue(&quot;name&quot;,&quot;json&quot;);
+//获取 BeanDefinition 实例
+AbstractBeanDefinition beanDefinition = beanDefinitionBuilder.getBeanDefinition();
+//BeanDefinition并非Bean终态，可以自定义修改
+</code></pre>
+</li>
+<li>
+<p>通过 <code>AbstractBeanDefinition</code> 以及派生类</p>
+<pre><code>GenericBeanDefinition genericBeanDefinition = new GenericBeanDefinition();
+genericBeanDefinition.setBeanClass(User.class);
+MutablePropertyValues propertyValues = new MutablePropertyValues();
+propertyValues.addPropertyValue(&quot;id&quot;,4);
+propertyValues.addPropertyValue(&quot;name&quot;,&quot;kvein&quot;);
+genericBeanDefinition.setPropertyValues(propertyValues);
+</code></pre>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="命名spring-bean">命名Spring Bean</h2>
+<h3 id="bean-的名称">Bean 的名称</h3>
+<blockquote>
+<p>每个 Bean 拥有一个或多个标识符（identifiers），这些标识符在 Bean 所在的容器必须是唯一 的。通常，一个 Bean 仅有一个标识符，如果需要额外的，可考虑使用别名（Alias）来扩充。</p>
+</blockquote>
+<blockquote>
+<p>在基于 XML 的配置元信息中，开发人员可用 id 或者 name 属性来规定 Bean 的 标识符。通常 Bean 的 标识符由字母组成，允许出现特殊字符。如果要想引入 Bean 的别名的话，可在 name 属性使用半角逗号（“,”）或分号（“;”) 来间隔。</p>
+</blockquote>
+<blockquote>
+<p>Bean 的 id 或 name 属性并非必须制定，如果留空的话，容器会为 Bean 自动生成一个唯一的 名称。Bean的命名尽管没有限制，不过官方建议采用驼峰的方式，更符合 Java 的命名约定。</p>
+</blockquote>
+<h3 id="bean-名称生成器beannamegenerator">Bean 名称生成器（BeanNameGenerator）</h3>
+<p>由 Spring Framework 2.0.3 引入，框架內建两种实现：</p>
+<ul>
+<li>
+<p><code>DefaultBeanNameGenerator</code>：默认通用 BeanNameGenerator 实现</p>
+<pre><code>public class DefaultBeanNameGenerator implements BeanNameGenerator {
+
+	public static final DefaultBeanNameGenerator INSTANCE = new DefaultBeanNameGenerator();
+
+	@Override
+	public String generateBeanName(BeanDefinition definition, BeanDefinitionRegistry registry) {
+		return BeanDefinitionReaderUtils.generateBeanName(definition, registry);
+	}
+}
+</code></pre>
+</li>
+<li>
+<p><code>AnnotationBeanNameGenerator</code>：基于注解扫描的 BeanNameGenerator 实现，起始于 Spring Framework 2.5，关联的官方文档：</p>
+</li>
+</ul>
+<blockquote>
+<p>With component scanning in the classpath, Spring generates bean names for unnamed components, following the rules described earlier: essentially, taking the simple class name and turning its initial character to lower-case. However, in the (unusual) special case when there is more than one character and both the first and second characters are upper case, the original casing gets preserved. These are the same rules as defined by java.beans.Introspector.decapitalize (which Spring uses here).</p>
+</blockquote>
+<h2 id="spring-bean的别名">Spring Bean的别名</h2>
+<p>Bean 别名（Alias）的价值</p>
+<ul>
+<li>复用现有的 <code>BeanDefinition</code></li>
+<li>更具有场景化的命名方法，比如：</li>
+</ul>
+<pre><code>&lt;alias name=&quot;myApp-dataSource&quot; alias=&quot;subsystemA-dataSource&quot;/&gt; 
+&lt;alias name=&quot;myApp-dataSource&quot; alias=&quot;subsystemB-dataSource&quot;/&gt;
+</code></pre>
+<h2 id="注册spring-bean">注册Spring Bean</h2>
+<h3 id="beandefinition-注册">BeanDefinition 注册</h3>
+<ul>
+<li>
+<p>XML 配置元信息</p>
+<ul>
+<li><code>&lt;bean name=”...” ... /&gt;</code></li>
+</ul>
+</li>
+<li>
+<p>Java 注解配置元信息</p>
+<ul>
+<li>
+<p><code>@Bean</code></p>
+<pre><code> @Bean(name = {&quot;xxx&quot;,&quot;yyy&quot;})
+</code></pre>
+</li>
+<li>
+<p><code>@Component</code></p>
+</li>
+<li>
+<p><code>@Import</code></p>
+</li>
+</ul>
+</li>
+<li>
+<p>Java API 配置元信息</p>
+<ul>
+<li>
+<p>命名方式：<code>BeanDefinitionRegistry#registerBeanDefinition(String,BeanDefinition)</code></p>
+<pre><code class="language-java">public static void registerBeanDefinition(BeanDefinitionRegistry registry,String beanName,Class&lt;?&gt; beanClass){
+        BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(beanClass);
+        beanDefinitionBuilder.addPropertyValue(&quot;id&quot;,2L).addPropertyValue(&quot;name&quot;,&quot;yy&quot;);
+        registry.registerBeanDefinition(beanName,beanDefinitionBuilder.getBeanDefinition());
+}
+</code></pre>
+</li>
+<li>
+<p>非命名方式：<code>BeanDefinitionReaderUtils#registerWithGeneratedName(AbstractBeanDefinition,Be anDefinitionRegistry)</code></p>
+<pre><code>public static void registerBeanDeinition(BeanDefinitionRegistry registry,Class&lt;?&gt; beanClass){
+        BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(beanClass);
+        	   beanDefinitionBuilder.addPropertyValue(&quot;id&quot;,2L).addPropertyValue(&quot;name&quot;,&quot;yy&quot;);
+        BeanDefinitionReaderUtils.registerWithGeneratedName(beanDefinitionBuilder.getBeanDefinition(),registry);
+}
+</code></pre>
+</li>
+<li>
+<p>配置类方式：<code>AnnotatedBeanDefinitionReader#register(Class...)</code></p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="外部单例对象注册">外部单例对象注册</h3>
+<ul>
+<li>Java API 配置元信息
+<ul>
+<li><code>SingletonBeanRegistry#registerSingleton</code></li>
+</ul>
+</li>
+</ul>
+<h2 id="实例化-spring-bean">实例化 Spring Bean</h2>
+<ul>
+<li>Bean 实例化（Instantiation）
+<ul>
+<li>常规方式
+<ul>
+<li>通过构造器（配置元信息：XML、Java 注解和 Java API ）</li>
+<li>通过静态工厂方法（配置元信息：XML 和 Java API ）</li>
+<li>通过 Bean 工厂方法（配置元信息：XML和 Java API ）</li>
+<li>通过 FactoryBean（配置元信息：XML、Java 注解和 Java API ）</li>
+</ul>
+</li>
+<li>特殊方式
+<ul>
+<li>通过 <code>ServiceLoaderFactoryBean</code>（配置元信息：XML、Java 注解和 Java API ）</li>
+<li>通过 <code>AutowireCapableBeanFactory#createBean(java.lang.Class, int, boolean)</code></li>
+<li>通过 <code>BeanDefinitionRegistry#registerBeanDefinition(String, BeanDefinition)</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="初始化-spring-bean">初始化 Spring Bean</h2>
+<h3 id="bean-初始化initialization">Bean 初始化（Initialization）</h3>
+<ul>
+<li><code>@PostConstruct</code> 标注方法</li>
+<li>实现 InitializingBean 接口的 <code>afterPropertiesSet()</code> 方法</li>
+<li>自定义初始化方法
+<ul>
+<li>XML 配置：<code>&lt;bean init-method=”init” ... /&gt;</code></li>
+<li>Java 注解：<code>@Bean(initMethod=”init”)</code></li>
+<li>Java API：<code>AbstractBeanDefinition#setInitMethodName(String)</code></li>
+</ul>
+</li>
+</ul>
+<p>这些方法的执行顺序是怎样？</p>
+<blockquote>
+<p><code>@PostConstruct</code> -&gt; <code>afterPropertiesSet()</code> -&gt; 自定义初始化方法</p>
+</blockquote>
+<h2 id="延迟初始化-spring-bean">延迟初始化 Spring Bean</h2>
+<h3 id="bean-延迟初始化lazy-initialization">Bean 延迟初始化（Lazy Initialization）</h3>
+<ul>
+<li>XML 配置：<code>&lt;bean lazy-init=”true” ... /&gt;</code></li>
+<li>Java 注解：<code>@Lazy(true)</code></li>
+</ul>
+<p>非延时加载在Spring应用上下文启动完成后，被初始化；延时加载在Spring上下文启动后再加载。</p>
+<pre><code>//refresh()
+// Instantiate all remaining (non-lazy-init) singletons.
+finishBeanFactoryInitialization(beanFactory);
+</code></pre>
+<h2 id="销毁-spring-bean">销毁 Spring Bean</h2>
+<ul>
+<li>
+<p>@PreDestroy 标注方法</p>
+</li>
+<li>
+<p>实现 DisposableBean 接口的 destroy() 方法</p>
+</li>
+<li>
+<p>自定义销毁方法</p>
+<ul>
+<li>XML 配置：&lt;bean destroy=”destroy” ... /&gt;</li>
+<li>Java 注解：@Bean(destroy=”destroy”)</li>
+<li>Java API：AbstractBeanDefinition#setDestroyMethodName(String)</li>
+</ul>
+<blockquote>
+<p>@PreDestroy -&gt; DisposableBean# destroy() -&gt; 自定义销毁方法</p>
+</blockquote>
+</li>
+</ul>
+<h2 id="垃圾回收-spring-bean">垃圾回收 Spring Bean</h2>
+<ul>
+<li>关闭 Spring 容器（应用上下文）</li>
+<li>执行 GC</li>
+<li>Spring Bean覆盖的finalize()方法被回调</li>
+</ul>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Spring IoC容器概述]]></title>
+        <id>https://k-21d.github.io/post/spring-ioc-rong-qi-gai-shu/</id>
+        <link href="https://k-21d.github.io/post/spring-ioc-rong-qi-gai-shu/">
+        </link>
+        <updated>2020-01-20T07:15:37.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="spring-ioc依赖查找">Spring IoC依赖查找</h2>
+<h3 id="根据bean名称查找">根据Bean名称查找</h3>
+<h4 id="实时查找">实时查找</h4>
+<p><code>User user = (User) beanFactory.getBean(&quot;user&quot;);</code></p>
+<h4 id="延时查找">延时查找</h4>
+<pre><code>ObjectFactory&lt;User&gt; objectFactory = (ObjectFactory&lt;User&gt;) beanFactory.getBean(&quot;objectFactory&quot;);
+User user = objectFactory.getObject();
+</code></pre>
+<h3 id="根据bean类型查找">根据Bean类型查找</h3>
+<h4 id="单个bean对象">单个Bean对象</h4>
+<p><code>User user = beanFactory.getBean(User.class);</code></p>
+<h4 id="集合bean对象">集合Bean对象</h4>
+<pre><code>if (beanFactory instanceof ListableBeanFactory){
+    ListableBeanFactory listableBeanFactory = (ListableBeanFactory) beanFactory;
+    Map&lt;String, User&gt; users = listableBeanFactory.getBeansOfType(User.class);
+}
+</code></pre>
+<h3 id="根据bean名称类型查找">根据Bean名称+类型查找</h3>
+<h3 id="根据java注解查找">根据Java注解查找</h3>
+<ul>
+<li>单个Bean对象</li>
+<li>集合Bean对象</li>
+</ul>
+<pre><code class="language-Java">private static void lookupByAnnotation(BeanFactory beanFactory) {
+    if (beanFactory instanceof ListableBeanFactory) {
+        ListableBeanFactory listableBeanFactory = (ListableBeanFactory) beanFactory;
+        Map&lt;String, Object&gt; beansWithAnnotation = listableBeanFactory.getBeansWithAnnotation(Super.class);
+        System.out.println(&quot;@Super:&quot;+beansWithAnnotation);
+    }
+}
+</code></pre>
+<h2 id="spring-ioc依赖注入">Spring IoC依赖注入</h2>
+<h3 id="根据bean名称注入">根据Bean名称注入</h3>
+<h3 id="根据bean类型注入">根据Bean类型注入</h3>
+<ul>
+<li>单个Bean对象</li>
+<li>集合Bean对象</li>
+</ul>
+<h3 id="注入容器内建bean对象">注入容器内建Bean对象</h3>
+<h3 id="注入非bean对象">注入非Bean对象</h3>
+<h3 id="注入类型">注入类型</h3>
+<ul>
+<li>实时注入</li>
+<li>延时注入</li>
+</ul>
+<h2 id="spring-ioc依赖来源">Spring IoC依赖来源</h2>
+<pre><code>public class UserRepository {
+    private Collection&lt;User&gt; users; //自定义bean
+    private BeanFactory beanFactory; //内建非Bean对象（依赖）
+    private ObjectFactory&lt;ApplicationContext&gt; objectFactory;
+    public BeanFactory getBeanFactory() {
+        return beanFactory;
+    }
+    public void setBeanFactory(BeanFactory beanFactory) {
+        this.beanFactory = beanFactory;
+    }
+    public ObjectFactory&lt;ApplicationContext&gt; getObjectFactory() {
+        return objectFactory;
+    }
+    public void setObjectFactory(ObjectFactory&lt;ApplicationContext&gt; objectFactory) {
+        this.objectFactory = objectFactory;
+    }
+    public Collection&lt;User&gt; getUsers() {
+        return users;
+    }
+    public void setUsers(Collection&lt;User&gt; users) {
+        this.users = users;
+    }
+}
+</code></pre>
+<h3 id="自定义bean">自定义Bean</h3>
+<pre><code>UserRepository userRepository = beanFactory.getBean(&quot;userRepository&quot;, UserRepository.class);
+</code></pre>
+<h3 id="依赖注入内建依赖">依赖注入（内建依赖）</h3>
+<p><code>userRepository.getBeanFactory();</code></p>
+<h3 id="容器内建依赖">容器内建依赖</h3>
+<p><code>Environment environment = beanFactory.getBean(Environment.class);</code></p>
+<h2 id="spring-ioc配置元信息">Spring Ioc配置元信息</h2>
+<h3 id="bean-定义配置">Bean 定义配置</h3>
+<ul>
+<li>基于XMl文件</li>
+<li>基于Properties文件</li>
+<li>基于Java注解</li>
+<li>基于Java API</li>
+</ul>
+<h3 id="ioc容器配置">IoC容器配置</h3>
+<ul>
+<li>基于XMl文件</li>
+<li>基于Java注解</li>
+<li>基于Java API</li>
+</ul>
+<h3 id="外部化属性配置">外部化属性配置</h3>
+<ul>
+<li>基于Java注解</li>
+</ul>
+<h2 id="spring-ioc容器">Spring IoC容器</h2>
+<ul>
+<li>BeanFactory和ApplicationContext</li>
+</ul>
+<h2 id="spring-应用上下文">Spring 应用上下文</h2>
+<ul>
+<li>ApplicaitonContext除了IoC容器角色，还有提供：
+<ul>
+<li>面向切面</li>
+<li>配置元信息</li>
+<li>资源管理</li>
+<li>事件</li>
+<li>国际化</li>
+<li>注解</li>
+<li>Environment抽象</li>
+</ul>
+</li>
+</ul>
+<p><a href="https://docs.spring.io/spring/docs/5.2.2.RELEASE/spring-framework-reference/core.html">spring doc</a></p>
+<h2 id="使用spring-ioc容器">使用Spring IoC容器</h2>
+<ul>
+<li>BeanFactory是Spring底层Ioc容器</li>
+</ul>
+<pre><code>//创建BeanFactory容器
+DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(beanFactory);
+//XML配置文件 ClassPath路径
+String location = &quot;classpath:/META-INF/dependency-lookup-context.xml&quot;;
+//加载配置
+reader.loadBeanDefinitions(location);
+</code></pre>
+<ul>
+<li>ApplicaitonContext事具备应用特性的BeanFactory超集</li>
+</ul>
+<pre><code>//创建BeanFactory容器
+AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext();
+//将当前类作为配置类
+applicationContext.register(AnnotationApplicationConetxtAsIoCContainerDemo.class);
+//启动应用上下文
+applicationContext.refresh();
+</code></pre>
+<h2 id="spring-ioc容器生命周期">Spring IoC容器生命周期</h2>
+<ul>
+<li>启动<pre><code>	@Override
+	public void refresh() throws BeansException, IllegalStateException {
+		synchronized (this.startupShutdownMonitor) {
+			// Prepare this context for refreshing.
+			prepareRefresh();
+
+			// Tell the subclass to refresh the internal bean factory.
+			ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
+
+			// Prepare the bean factory for use in this context.
+			prepareBeanFactory(beanFactory);
+
+			try {
+				// Allows post-processing of the bean factory in context subclasses.
+				postProcessBeanFactory(beanFactory);
+
+				// Invoke factory processors registered as beans in the context.
+				invokeBeanFactoryPostProcessors(beanFactory);
+
+				// Register bean processors that intercept bean creation.
+				registerBeanPostProcessors(beanFactory);
+
+				// Initialize message source for this context.
+				initMessageSource();
+
+				// Initialize event multicaster for this context.
+				initApplicationEventMulticaster();
+
+				// Initialize other special beans in specific context subclasses.
+				onRefresh();
+
+				// Check for listener beans and register them.
+				registerListeners();
+
+				// Instantiate all remaining (non-lazy-init) singletons.
+				finishBeanFactoryInitialization(beanFactory);
+
+				// Last step: publish corresponding event.
+				finishRefresh();
+			}
+
+			catch (BeansException ex) {
+				if (logger.isWarnEnabled()) {
+					logger.warn(&quot;Exception encountered during context initialization - &quot; +
+							&quot;cancelling refresh attempt: &quot; + ex);
+				}
+
+				// Destroy already created singletons to avoid dangling resources.
+				destroyBeans();
+
+				// Reset 'active' flag.
+				cancelRefresh(ex);
+
+				// Propagate exception to caller.
+				throw ex;
+			}
+
+			finally {
+				// Reset common introspection caches in Spring's core, since we
+				// might not ever need metadata for singleton beans anymore...
+				resetCommonCaches();
+			}
+		}
+	}
+</code></pre>
+</li>
+<li>运行</li>
+<li>停止<pre><code>	@Override
+	public void close() {
+		synchronized (this.startupShutdownMonitor) {
+			doClose();
+			// If we registered a JVM shutdown hook, we don't need it anymore now:
+			// We've already explicitly closed the context.
+			if (this.shutdownHook != null) {
+				try {
+					Runtime.getRuntime().removeShutdownHook(this.shutdownHook);
+				}
+				catch (IllegalStateException ex) {
+					// ignore - VM is already shutting down
+				}
+			}
+		}
+	}
+</code></pre>
+</li>
+</ul>
+<h2 id="beanfactory和factorybean">BeanFactory和FactoryBean</h2>
+<pre><code>public interface FactoryBean&lt;T&gt; {
+
+	String OBJECT_TYPE_ATTRIBUTE = &quot;factoryBeanObjectType&quot;;
+	
+	@Nullable
+	T getObject() throws Exception;
+
+	@Nullable
+	Class&lt;?&gt; getObjectType();
+
+	default boolean isSingleton() {
+		return true;
+	}
+}
+
+</code></pre>
+<ul>
+<li>BeanFactory是IoC底层容器</li>
+<li>FactoryBean 是 创建 Bean 的一种方式，帮助实现复杂的初始化逻辑</li>
+</ul>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[重新认识IoC]]></title>
+        <id>https://k-21d.github.io/post/chong-xin-ren-shi-ioc/</id>
+        <link href="https://k-21d.github.io/post/chong-xin-ren-shi-ioc/">
+        </link>
+        <updated>2020-01-15T09:16:15.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="ioc-发展简介">IoC 发展简介</h1>
+<h2 id="什么是-ioc">什么是 IoC ？</h2>
+<blockquote>
+<p>In software engineering, inversion of control (IoC) is a programming principle. IoC inverts the flow of<br>
+control as compared to traditional control flow. In IoC, custom-written portions of a computer program receive the flow of control from a generic framework. A software architecture with this design inverts control as compared to traditional procedural programming: in traditional programming, the custom code that expresses the purpose of the program calls into reusable libraries to take care of generic tasks, but with inversion of control, it is the framework that calls into the custom, or task-specific, code.<br>
+https://en.wikipedia.org/wiki/Inversion_of_control</p>
+</blockquote>
+<h2 id="ioc-的简史">IoC 的简史</h2>
+<ul>
+<li>1983年，Richard E. Sweet 在《The Mesa Programming Environment》中提出“Hollywood<br>
+Principle”（好莱坞原则）</li>
+<li>1988年，Ralph E. Johnson &amp; Brian Foote 在《Designing Reusable Classes》中提出“Inversion<br>
+of control”（控制反转）</li>
+<li>1996年，Michael Mattsson 在《Object-Oriented Frameworks, A survey of methodological<br>
+issues》中将“Inversion of control”命名为 “Hollywood principle”</li>
+<li>2004年，Martin Fowler 在《Inversion of Control Containers and the Dependency Injection<br>
+pattern》中提出了自己对 IoC 以及 DI 的理解</li>
+<li>2005年，Martin Fowler 在 《InversionOfControl》对 IoC 做出进一步的说明</li>
+</ul>
+<h1 id="ioc-主要实现策略">IoC 主要实现策略</h1>
+<h2 id="维基百科">维基百科</h2>
+<ul>
+<li>Using a service locator pattern</li>
+<li>Using dependency injection, for example
+<ul>
+<li>Constructor injection</li>
+<li>Parameter injection</li>
+<li>Setter injection</li>
+<li>Interface injection</li>
+</ul>
+</li>
+<li>Using a contextualized lookup</li>
+<li>Using template method design pattern</li>
+<li>Using strategy design pattern</li>
+</ul>
+<h2 id="expert-one-on-onetm-j2eetm-development-without-ejbtm">《Expert One-on-One™ J2EE™ Development without EJB™》</h2>
+<h3 id="dependency-lookup">Dependency Lookup</h3>
+<blockquote>
+<p>The container provides callbacks to components, and a lookup context. This is<br>
+the EJB and Apache Avalon approach. It leaves the onus on each component to use container APIs to<br>
+look up resources and collaborators. The Inversion of Control is limited to the container invoking<br>
+callback methods that application code can use to obtain resources.</p>
+</blockquote>
+<h3 id="dependency-injection">Dependency Injection</h3>
+<blockquote>
+<p>Components do no look up; they provide plain Java methods enabling the<br>
+container to resolve dependencies. The container is wholly responsible for wiring up components,<br>
+passing resolved objects in to JavaBean properties or constructors. Use of JavaBean properties is<br>
+called Setter Injection; use of constructor arguments is called Constructor Injection.</p>
+</blockquote>
+<h1 id="ioc-容器的职责">IoC 容器的职责</h1>
+<ul>
+<li>依赖处理
+<ul>
+<li>依赖查找</li>
+<li>依赖注入</li>
+</ul>
+</li>
+<li>生命周期管理
+<ul>
+<li>容器</li>
+<li>托管的资源（Java Beans 或其他资源）</li>
+</ul>
+</li>
+<li>配置
+<ul>
+<li>容器</li>
+<li>外部化配置</li>
+<li>托管的资源（Java Beans 或其他资源）</li>
+</ul>
+</li>
+</ul>
+<h1 id="传统-ioc-容器实现">传统 IoC 容器实现</h1>
+<ul>
+<li>Java SE
+<ul>
+<li>Java Beans</li>
+<li>Java ServiceLoader SPI</li>
+<li>JNDI（Java Naming and Directory Interface）</li>
+</ul>
+</li>
+<li>Java EE
+<ul>
+<li>EJB（Enterprise Java Beans）</li>
+<li>Servlet</li>
+</ul>
+</li>
+<li>开源
+<ul>
+<li>Apache Avalon（http://avalon.apache.org/closed.html）</li>
+<li>PicoContainer（http://picocontainer.com/）</li>
+<li>Google Guice（https://github.com/google/guice）</li>
+<li>Spring Framework（https://spring.io/projects/spring-framework）</li>
+</ul>
+</li>
+</ul>
+<h2 id="java-beans-作为-ioc-容器">Java Beans 作为 IoC 容器</h2>
+<ul>
+<li>特性
+<ul>
+<li>依赖查找</li>
+<li>生命周期管理</li>
+<li>配置元信息</li>
+<li>事件</li>
+<li>自定义</li>
+<li>资源管理</li>
+<li>持久化</li>
+</ul>
+</li>
+<li>规范
+<ul>
+<li>JavaBeans：https://www.oracle.com/technetwork/java/javase/tech/index-jsp-138795.html</li>
+<li>BeanContext：https://docs.oracle.com/javase/8/docs/technotes/guides/beans/spec/beancontext.html</li>
+</ul>
+</li>
+</ul>
+<h1 id="轻量级-ioc-容器">轻量级 IoC 容器</h1>
+<ul>
+<li>《Expert One-on-One™ J2EE™ Development without EJB™》认为轻量级容器的特征：
+<ul>
+<li>A container that can manage application code.</li>
+<li>A container that is quick to start up.</li>
+<li>A container that doesn't require any special deployment steps to deploy objects within it.</li>
+<li>A container that has such a light footprint and minimal API dependencies that it can be run in a variety of environments.</li>
+<li>A container that sets the bar for adding a managed object so low in terms of deployment effort and performance<br>
+overhead that it's possible to deploy and manage fine-grained objects, as well as coarse-grained components.</li>
+</ul>
+</li>
+<li>《Expert One-on-One™ J2EE™ Development without EJB™》认为轻量级容器的好处：
+<ul>
+<li>Escaping the monolithic container</li>
+<li>Maximizing code reusability</li>
+<li>Greater object orientation</li>
+<li>Greater productivity</li>
+<li>Better testability</li>
+</ul>
+</li>
+</ul>
+<h1 id="构造器注入-vs-setter-注入">构造器注入 VS. Setter 注入</h1>
+<p>Spring Framework 对构造器注入与 Setter 的论点：</p>
+<blockquote>
+<p>“The Spring team generally advocates constructor injection, as it lets you implement application components as<br>
+immutable objects and ensures that required dependencies are not null. Furthermore, constructor-injected components<br>
+are always returned to the client (calling) code in a fully initialized state. As a side note, a large number of constructor<br>
+arguments is a bad code smell, implying that the class likely has too many responsibilities and should be refactored to<br>
+better address proper separation of concerns.</p>
+</blockquote>
+<blockquote>
+<p>Setter injection should primarily only be used for optional dependencies that can be assigned reasonable default values<br>
+within the class. Otherwise, not-null checks must be performed everywhere the code uses the dependency. One benefit of<br>
+setter injection is that setter methods make objects of that class amenable to reconfiguration or re-injection later.<br>
+Management through JMX MBeans is therefore a compelling use case for setter injection.”</p>
+</blockquote>
+<p>《Expert One-on-One™ J2EE™ Development without EJB™》认为 Setter 注入的优点：</p>
+<ul>
+<li>JavaBean properties are well supported in IDEs.</li>
+<li>JavaBean properties are self-documenting.</li>
+<li>JavaBean properties are inherited by subclasses without the need for any code.</li>
+<li>It's possible to use the standard JavaBeans property-editor machinery for type conversions if necessary.</li>
+<li>Many existing JavaBeans can be used within a JavaBean-oriented IoC container without modification.</li>
+<li>If there is a corresponding getter for each setter (making the property readable, as well as writable), it is possible to ask<br>
+the component for its current configuration state. This is particularly useful if we want to persist that state: for example,<br>
+in an XML form or in a database. With Constructor Injection, there's no way to find the current state.</li>
+<li>Setter Injection works well for objects that have default values, meaning that not all properties need to be supplied at<br>
+runtime.</li>
+</ul>
+<p>《Expert One-on-One™ J2EE™ Development without EJB™》认为 Setter 注入的缺点：</p>
+<blockquote>
+<p>The order in which setters are called is not expressed in any contract. Thus, we sometimes need to invoke a<br>
+method after the last setter has been called to initialize the component. Spring provides the<br>
+org.springframework.beans.factory.InitializingBean interface for this; it also provides the ability to invoke an<br>
+arbitrary init method. However, this contract must be documented to ensure correct use outside a container.Not all the necessary setters may have been called before use. The object can thus be left partially configured.</p>
+</blockquote>
+<p>《Expert One-on-One™ J2EE™ Development without EJB™》认为构造器注入的优点：</p>
+<blockquote>
+<p>Each managed object is guaranteed to be in a consistent state—fully configured—before it can be invoked in<br>
+any business methods. This is the primary motivation of Constructor Injection. (However, it is possible to achieve<br>
+the same result with JavaBeans via dependency checking, as Spring can optionally perform.) There's no need for<br>
+initialization methods.</p>
+</blockquote>
+<blockquote>
+<p>There may be slightly less code than results from the use of multiple JavaBean methods, although will be no<br>
+difference in complexity.</p>
+</blockquote>
+<p>《Expert One-on-One™ J2EE™ Development without EJB™》认为构造器注入的缺点：</p>
+<ul>
+<li>Although also a Java-language feature, multi-argument constructors are probably less common in existing code than<br>
+use of JavaBean properties.</li>
+<li>Java constructor arguments don't have names visible by introspection.</li>
+<li>Constructor argument lists are less well supported by IDEs than JavaBean setter methods.</li>
+<li>Long constructor argument lists and large constructor bodies can become unwieldy.</li>
+<li>Concrete inheritance can become problematic.</li>
+<li>Poor support for optional properties, compared to JavaBeans</li>
+<li>Unit testing can be slightly more difficult</li>
+<li>When collaborators are passed in on object construction, it becomes impossible to change the reference held in the<br>
+object.</li>
+</ul>
+]]></content>
+    </entry>
+</feed>
