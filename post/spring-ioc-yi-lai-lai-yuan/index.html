@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>Spring IoC 依赖来源 | 学习博客</title>
+<meta name="description" content="Java Blog">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://k-21d.github.io/favicon.ico?v=1586002723900">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://k-21d.github.io/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://k-21d.github.io">
+        <img src="https://k-21d.github.io/images/avatar.png?v=1586002723900" class="site-logo">
+        <h1 class="site-title">学习博客</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="https://k-21d.github.io" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      Java Blog
+    </div>
+    <div class="site-footer">
+      Powered by k21d | <a class="rss" href="https://k-21d.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">Spring IoC 依赖来源</h2>
+            <div class="post-date">2020-02-12</div>
+            
+            <div class="post-content">
+              <p>Spring IOC的三种依赖来源：</p>
+<ul>
+<li>
+<p>自定义注册的Spring bean，通过xml、注解或者api注册BeanDefination创建的</p>
+</li>
+<li>
+<p>内建的Spring bean，通过registerSingleton()创建的</p>
+</li>
+<li>
+<p>内建的可注入的依赖，通过registerResolveDependency()创建</p>
+<p>后续如果我们需要往Spring容器里放入一些非Spring托管的bean但又可以被依赖注入的, 可以通过registerResolveDependency() API实现</p>
+</li>
+</ul>
+<h2 id="依赖查找的来源">依赖查找的来源</h2>
+<h3 id="查找来源">查找来源</h3>
+<table>
+<thead>
+<tr>
+<th>来源</th>
+<th>配置元数据</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Spring BeanDefinition</td>
+<td><bean id="user" class="org.geekbang...User"></td>
+</tr>
+<tr>
+<td></td>
+<td>@Bean public User user(){...}</td>
+</tr>
+<tr>
+<td></td>
+<td>BeanDefinitionBuilder</td>
+</tr>
+<tr>
+<td>单例对象</td>
+<td>API 实现</td>
+</tr>
+</tbody>
+</table>
+<h3 id="spring-內建-beandefintion">Spring 內建 BeanDefintion</h3>
+<table>
+<thead>
+<tr>
+<th>Bean 实例</th>
+<th>使用场景</th>
+<th>Bean 名称</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ConfigurationClassPostProcessor 对象</td>
+<td>处理 Spring 配置类</td>
+<td><code>org.springframework.context.annotation.internalConfigurationAnnotationProcessor</code></td>
+</tr>
+<tr>
+<td>AutowiredAnnotationBeanPostProcessor 对象</td>
+<td>处理 @Autowired 以及 @Value注解</td>
+<td><code>org.springframework.context.annotation.internalAutowiredAnnotationProcessor</code></td>
+</tr>
+<tr>
+<td>CommonAnnotationBeanPostProcessor 对象</td>
+<td>（条件激活）处理 JSR-250 注解，如 @PostConstruct 等</td>
+<td><code>org.springframework.context.annotation.internalCommonAnnotationProcessor</code></td>
+</tr>
+<tr>
+<td>EventListenerMethodProcessor对象</td>
+<td>处理标注 @EventListener 的Spring 事件监听方法</td>
+<td><code>org.springframework.context.event.internalEventListenerProcessor</code></td>
+</tr>
+<tr>
+<td>DefaultEventListenerFactory 对象</td>
+<td>@EventListener 事件监听方法适配为 ApplicationListener</td>
+<td><code>org.springframework.context.event.internalEventListenerFactory</code></td>
+</tr>
+<tr>
+<td>PersistenceAnnotationBeanPostProcessor 对象</td>
+<td>（条件激活）处理 JPA 注解场景</td>
+<td><code>org.springframework.context.annotation.internalPersistenceAnnotationProcessor</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="spring-內建单例对象">Spring 內建单例对象</h3>
+<table>
+<thead>
+<tr>
+<th>Bean 名称</th>
+<th>Bean 实例</th>
+<th>使用场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>environment</td>
+<td>Environment 对象</td>
+<td>外部化配置以及 Profiles</td>
+</tr>
+<tr>
+<td>systemProperties</td>
+<td>java.util.Properties 对象</td>
+<td>java.util.Properties 对象</td>
+</tr>
+<tr>
+<td>systemEnvironment</td>
+<td>java.util.Map 对象</td>
+<td>操作系统环境变量</td>
+</tr>
+<tr>
+<td>messageSource</td>
+<td>MessageSource 对象</td>
+<td>国际化文案</td>
+</tr>
+<tr>
+<td>lifecycleProcessor</td>
+<td>LifecycleProcessor 对象</td>
+<td>Lifecycle Bean 处理器</td>
+</tr>
+<tr>
+<td>applicationEventMulticaster</td>
+<td>ApplicationEventMulticaster 对象</td>
+<td>Spring 事件广播器</td>
+</tr>
+</tbody>
+</table>
+<h2 id="依赖注入的来源">依赖注入的来源</h2>
+<h3 id="注入来源">注入来源</h3>
+<table>
+<thead>
+<tr>
+<th>来源</th>
+<th>配置元数据</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Spring BeanDefinition</td>
+<td><bean id="user" class="org.geekbang...User"></td>
+</tr>
+<tr>
+<td></td>
+<td>@Bean public User user(){...}</td>
+</tr>
+<tr>
+<td></td>
+<td>BeanDefinitionBuilder</td>
+</tr>
+<tr>
+<td>单例对象</td>
+<td>API 实现</td>
+</tr>
+<tr>
+<td>非Spring容器管理对象</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2 id="spring-容器管理和游离对象">Spring 容器管理和游离对象</h2>
+<p>依赖对象</p>
+<table>
+<thead>
+<tr>
+<th>来源</th>
+<th>Spring Bean 对象</th>
+<th>生命周期管理</th>
+<th>配置元信息</th>
+<th>使用场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Spring BeanDefinition</td>
+<td>是</td>
+<td>是</td>
+<td>有</td>
+<td>依赖查找、依赖注入</td>
+</tr>
+<tr>
+<td>单体对象</td>
+<td>是</td>
+<td>否</td>
+<td>无</td>
+<td>依赖查找、依赖注入</td>
+</tr>
+<tr>
+<td>Resolvable Dependency</td>
+<td>否</td>
+<td>否</td>
+<td>无</td>
+<td>依赖注入</td>
+</tr>
+</tbody>
+</table>
+<h3 id="spring-beandefinition-作为依赖来源">Spring BeanDefinition 作为依赖来源</h3>
+<ul>
+<li>元数据：BeanDefinition</li>
+<li>注册：BeanDefinitionRegistry#registerBeanDefinition</li>
+<li>类型：延迟和非延迟</li>
+<li>顺序：Bean 生命周期顺序按照注册顺序</li>
+</ul>
+<h3 id="单例对象作为依赖来源">单例对象作为依赖来源</h3>
+<h4 id="要素">要素</h4>
+<ul>
+<li>来源：外部普通 Java 对象（不一定是 POJO）</li>
+<li>注册：SingletonBeanRegistry#registerSingleton</li>
+</ul>
+<h4 id="限制">限制</h4>
+<ul>
+<li>无生命周期管理</li>
+<li>无法实现延迟初始化 Bean</li>
+</ul>
+<h3 id="非-spring-容器管理对象作为依赖来源">非 Spring 容器管理对象作为依赖来源</h3>
+<h4 id="要素-2">要素</h4>
+<ul>
+<li>注册：ConfigurableListableBeanFactory#registerResolvableDependency</li>
+</ul>
+<h4 id="限制-2">限制</h4>
+<ul>
+<li>无生命周期管理</li>
+<li>无法实现延迟初始化 Bean</li>
+<li>无法通过依赖查找</li>
+</ul>
+<h2 id="外部化配置作为依赖来源">外部化配置作为依赖来源</h2>
+<h4 id="要素-3">要素</h4>
+<ul>
+<li>类型：非常规 Spring 对象依赖来源</li>
+</ul>
+<h4 id="限制-3">限制</h4>
+<ul>
+<li>无生命周期管理</li>
+<li>无法实现延迟初始化 Bean</li>
+<li>无法通过依赖查找</li>
+</ul>
+
+            </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://k-21d.github.io/tag/TNP4BReFW/" class="tag">
+                    spring
+                  </a>
+                
+              </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://k-21d.github.io/post/spring-ioc-zhu-ru/">
+                  <h3 class="post-title">
+                    Spring IoC 注入
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+
+<script type="application/javascript">
+
+AOS.init();
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>
