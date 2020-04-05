@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>Spring Bean生命周期 | 学习博客</title>
+<meta name="description" content="Java Blog">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://k-21d.github.io/favicon.ico?v=1586112904720">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://k-21d.github.io/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://k-21d.github.io">
+        <img src="https://k-21d.github.io/images/avatar.png?v=1586112904720" class="site-logo">
+        <h1 class="site-title">学习博客</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="https://k-21d.github.io" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      Java Blog
+    </div>
+    <div class="site-footer">
+      Powered by k21d | <a class="rss" href="https://k-21d.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">Spring Bean生命周期</h2>
+            <div class="post-date">2020-03-26</div>
+            
+            <div class="post-content">
+              <h2 id="spring-bean-元信息配置阶段">Spring Bean 元信息配置阶段</h2>
+<p>BeanDefinition 配置</p>
+<ul>
+<li>面向资源
+<ul>
+<li>XML 配置</li>
+<li>Properties 资源配置</li>
+</ul>
+</li>
+<li>面向注解</li>
+<li>面向 API</li>
+</ul>
+<h2 id="spring-bean-元信息解析阶段">Spring Bean 元信息解析阶段</h2>
+<h3 id="面向资源-beandefinition-解析">面向资源 BeanDefinition 解析</h3>
+<ul>
+<li>BeanDefinitionReader</li>
+<li>XML 解析器 - BeanDefinitionParser</li>
+</ul>
+<h3 id="面向注解-beandefinition-解析">面向注解 BeanDefinition 解析</h3>
+<ul>
+<li>AnnotatedBeanDefinitionReader</li>
+</ul>
+<h2 id="spring-bean-注册阶段">Spring Bean 注册阶段</h2>
+<ul>
+<li>BeanDefinition 注册接口
+<ul>
+<li>BeanDefinitionRegistry</li>
+</ul>
+</li>
+</ul>
+<h2 id="spring-beandefinition-合并阶段">Spring BeanDefinition 合并阶段</h2>
+<ul>
+<li>BeanDefinition 合并 -&gt;RootBeanDefinition
+<ul>
+<li>父子 BeanDefinition 合并
+<ul>
+<li>当前 BeanFactory 查找</li>
+<li>层次性 BeanFactory 查找</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="spring-bean-class-加载阶段">Spring Bean Class 加载阶段</h2>
+<ul>
+<li>ClassLoader 类加载</li>
+<li>Java Security 安全控制</li>
+<li>ConfigurableBeanFactory 临时 ClassLoader</li>
+</ul>
+<h2 id="spring-bean-实例化前阶段">Spring Bean 实例化前阶段</h2>
+<ul>
+<li>
+<p>非主流生命周期 - Bean 实例化前阶段 ,提前生成像代理对象的方式来替换掉默认的Spring IoC中的内容</p>
+<ul>
+<li>InstantiationAwareBeanPostProcessor#postProcessBeforeInstantiation</li>
+</ul>
+<pre><code>	@Nullable
+	protected Object applyBeanPostProcessorsBeforeInstantiation(Class&lt;?&gt; beanClass, String beanName) {
+		for (BeanPostProcessor bp : getBeanPostProcessors()) {
+			if (bp instanceof InstantiationAwareBeanPostProcessor) {
+				InstantiationAwareBeanPostProcessor ibp = (InstantiationAwareBeanPostProcessor) bp;
+				Object result = ibp.postProcessBeforeInstantiation(beanClass, beanName);
+				if (result != null) {
+					return result;
+				}
+			}
+		}
+		return null;
+	}
+</code></pre>
+</li>
+</ul>
+<h2 id="spring-bean-实例化阶段">Spring Bean 实例化阶段</h2>
+<pre><code>		try {
+			Object beanInstance = doCreateBean(beanName, mbdToUse, args);
+			if (logger.isTraceEnabled()) {
+				logger.trace(&quot;Finished creating instance of bean '&quot; + beanName + &quot;'&quot;);
+			}
+			return beanInstance;
+		}
+</code></pre>
+<ul>
+<li>实例化方式</li>
+<li>传统实例化方式
+<ul>
+<li>实例化策略 - InstantiationStrategy</li>
+</ul>
+</li>
+<li>构造器依赖注入</li>
+</ul>
+<pre><code>	protected Object doCreateBean(final String beanName, final RootBeanDefinition mbd, final @Nullable Object[] args)
+			throws BeanCreationException {
+
+		// Instantiate the bean.
+		BeanWrapper instanceWrapper = null;
+		if (mbd.isSingleton()) {//判断是否是单例
+			instanceWrapper = this.factoryBeanInstanceCache.remove(beanName);
+		}
+		if (instanceWrapper == null) {//返回BeanWrapper
+			instanceWrapper = createBeanInstance(beanName, mbd, args);
+		}
+		final Object bean = instanceWrapper.getWrappedInstance();
+		Class&lt;?&gt; beanType = instanceWrapper.getWrappedClass();
+		if (beanType != NullBean.class) {
+			mbd.resolvedTargetType = beanType;
+		}
+
+		// Allow post-processors to modify the merged bean definition.
+		synchronized (mbd.postProcessingLock) {
+			if (!mbd.postProcessed) {
+				try {
+					applyMergedBeanDefinitionPostProcessors(mbd, beanType, beanName);
+				}
+				catch (Throwable ex) {
+					throw new BeanCreationException(mbd.getResourceDescription(), beanName,
+							&quot;Post-processing of merged bean definition failed&quot;, ex);
+				}
+				mbd.postProcessed = true;
+			}
+		}
+
+		// Eagerly cache singletons to be able to resolve circular references
+		// even when triggered by lifecycle interfaces like BeanFactoryAware.
+		boolean earlySingletonExposure = (mbd.isSingleton() &amp;&amp; this.allowCircularReferences &amp;&amp;
+				isSingletonCurrentlyInCreation(beanName));
+		if (earlySingletonExposure) {
+			if (logger.isTraceEnabled()) {
+				logger.trace(&quot;Eagerly caching bean '&quot; + beanName +
+						&quot;' to allow for resolving potential circular references&quot;);
+			}
+			addSingletonFactory(beanName, () -&gt; getEarlyBeanReference(beanName, mbd, bean));
+		}
+
+		// Initialize the bean instance.
+		Object exposedObject = bean;
+		try {
+			populateBean(beanName, mbd, instanceWrapper);
+			exposedObject = initializeBean(beanName, exposedObject, mbd);
+		}
+		catch (Throwable ex) {
+			if (ex instanceof BeanCreationException &amp;&amp; beanName.equals(((BeanCreationException) ex).getBeanName())) {
+				throw (BeanCreationException) ex;
+			}
+			else {
+				throw new BeanCreationException(
+						mbd.getResourceDescription(), beanName, &quot;Initialization of bean failed&quot;, ex);
+			}
+		}
+
+		if (earlySingletonExposure) {
+			Object earlySingletonReference = getSingleton(beanName, false);
+			if (earlySingletonReference != null) {
+				if (exposedObject == bean) {
+					exposedObject = earlySingletonReference;
+				}
+				else if (!this.allowRawInjectionDespiteWrapping &amp;&amp; hasDependentBean(beanName)) {
+					String[] dependentBeans = getDependentBeans(beanName);
+					Set&lt;String&gt; actualDependentBeans = new LinkedHashSet&lt;&gt;(dependentBeans.length);
+					for (String dependentBean : dependentBeans) {
+						if (!removeSingletonIfCreatedForTypeCheckOnly(dependentBean)) {
+							actualDependentBeans.add(dependentBean);
+						}
+					}
+					if (!actualDependentBeans.isEmpty()) {
+						throw new BeanCurrentlyInCreationException(beanName,
+								&quot;Bean with name '&quot; + beanName + &quot;' has been injected into other beans [&quot; +
+								StringUtils.collectionToCommaDelimitedString(actualDependentBeans) +
+								&quot;] in its raw version as part of a circular reference, but has eventually been &quot; +
+								&quot;wrapped. This means that said other beans do not use the final version of the &quot; +
+								&quot;bean. This is often the result of over-eager type matching - consider using &quot; +
+								&quot;'getBeanNamesOfType' with the 'allowEagerInit' flag turned off, for example.&quot;);
+					}
+				}
+			}
+		}
+
+		// Register bean as disposable.
+		try {
+			registerDisposableBeanIfNecessary(beanName, bean, mbd);
+		}
+		catch (BeanDefinitionValidationException ex) {
+			throw new BeanCreationException(
+					mbd.getResourceDescription(), beanName, &quot;Invalid destruction signature&quot;, ex);
+		}
+
+		return exposedObject;
+	}
+</code></pre>
+<h2 id="spring-bean-实例化后阶段">Spring Bean 实例化后阶段</h2>
+<p>InstantiationAwareBeanPostProcessor#postProcessAfterInstantiation</p>
+<h2 id="spring-bean-属性赋值前阶段">Spring Bean 属性赋值前阶段</h2>
+<ul>
+<li>Bean 属性值元信息
+<ul>
+<li>PropertyValues</li>
+</ul>
+</li>
+<li>Bean 属性赋值前回调
+<ul>
+<li>Spring 1.2 - 5.0：InstantiationAwareBeanPostProcessor#postProcessPropertyValues</li>
+<li>Spring 5.1：InstantiationAwareBeanPostProcessor#postProcessProperties</li>
+</ul>
+</li>
+</ul>
+<h2 id="spring-bean-aware接口回调阶段">Spring Bean Aware接口回调阶段</h2>
+<ul>
+<li>Spring Aware 接口 （按调用顺序排列）
+<ul>
+<li>BeanNameAware</li>
+<li>BeanClassLoaderAware</li>
+<li>BeanFactoryAware</li>
+<li>EnvironmentAware</li>
+<li>EmbeddedValueResolverAware</li>
+<li>ResourceLoaderAware</li>
+<li>ApplicationEventPublisherAware</li>
+<li>MessageSourceAware</li>
+<li>ApplicationContextAware</li>
+</ul>
+</li>
+</ul>
+<h2 id="spring-bean-初始化前阶段">Spring Bean 初始化前阶段</h2>
+<ul>
+<li>已完成
+<ul>
+<li>Bean 实例化</li>
+<li>Bean 属性赋值</li>
+<li>Bean Aware 接口回调</li>
+</ul>
+</li>
+<li>方法回调
+<ul>
+<li>BeanPostProcessor#postProcessBeforeInitialization</li>
+</ul>
+</li>
+</ul>
+<h2 id="spring-bean-初始化阶段">Spring Bean 初始化阶段</h2>
+<ul>
+<li>Bean 初始化（Initialization）
+<ul>
+<li>@PostConstruct 标注方法</li>
+<li>实现 InitializingBean 接口的 afterPropertiesSet() 方法</li>
+<li>自定义初始化方法</li>
+</ul>
+</li>
+</ul>
+<h2 id="spring-bean-初始化后阶段">Spring Bean 初始化后阶段</h2>
+<ul>
+<li>方法回调
+<ul>
+<li>BeanPostProcessor#postProcessAfterInitialization</li>
+</ul>
+</li>
+</ul>
+<h2 id="spring-bean-初始化完成阶段">Spring Bean 初始化完成阶段</h2>
+<ul>
+<li>方法回调
+<ul>
+<li>Spring 4.1 +：SmartInitializingSingleton#afterSingletonsInstantiated</li>
+</ul>
+</li>
+</ul>
+<h2 id="spring-bean-销毁前阶段">Spring Bean 销毁前阶段</h2>
+<ul>
+<li>方法回调
+<ul>
+<li>DestructionAwareBeanPostProcessor#postProcessBeforeDestruction</li>
+</ul>
+</li>
+</ul>
+<h2 id="spring-bean-销毁阶段">Spring Bean 销毁阶段</h2>
+<ul>
+<li>Bean 销毁（Destroy）
+<ul>
+<li>@PreDestroy 标注方法</li>
+<li>实现 DisposableBean 接口的 destroy() 方法</li>
+<li>自定义销毁方法</li>
+</ul>
+</li>
+</ul>
+<h2 id="spring-bean-垃圾收集">Spring Bean 垃圾收集</h2>
+<ul>
+<li>Bean 垃圾回收（GC）
+<ul>
+<li>关闭 Spring 容器（应用上下文）</li>
+<li>执行 GC</li>
+<li>Spring Bean 覆盖的 finalize() 方法被回调</li>
+</ul>
+</li>
+</ul>
+<h2 id="面试题">面试题</h2>
+
+            </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://k-21d.github.io/post/spring-ioc-yi-lai-lai-yuan/">
+                  <h3 class="post-title">
+                    Spring IoC 依赖来源
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+
+<script type="application/javascript">
+
+AOS.init();
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>
