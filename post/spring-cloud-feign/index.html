@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>Spring Cloud Feign | 学习博客</title>
+<meta name="description" content="Java Blog">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://k-21d.github.io/favicon.ico?v=1586108481108">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://k-21d.github.io/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://k-21d.github.io">
+        <img src="https://k-21d.github.io/images/avatar.png?v=1586108481108" class="site-logo">
+        <h1 class="site-title">学习博客</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="https://k-21d.github.io" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      Java Blog
+    </div>
+    <div class="site-footer">
+      Powered by k21d | <a class="rss" href="https://k-21d.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">Spring Cloud Feign</h2>
+            <div class="post-date">2018-10-20</div>
+            
+            <div class="post-content">
+              <h2 id="声明式web服务客户端">声明式Web服务客户端</h2>
+<ul>
+<li>声明式：接口声明、Annonation驱动</li>
+<li>Web服务：HTTP的方式作为通讯协议</li>
+<li>客户端：用于服务调用的存根</li>
+</ul>
+<p>Feign: 原生并不是Spring WebMVC的实现，基于JAX-RS（Java REST规范）实现。Spring Cloud封装了Feign，使其支持Spring Web MVC。RestTemplate、HttpMessageConverter</p>
+<blockquote>
+<p>RestTemplate 以及Spring Web MVC可以显示地自定义HttpMessageConverter实现</p>
+</blockquote>
+<p>假设有一个Java接口PersonService，Feign可以将其声明它是以Http方式调用的</p>
+<p>需要服务（SOA）：</p>
+<h3 id="注册中心eureka-server用于服务发现和注册">注册中心（Eureka Server）：用于服务发现和注册</h3>
+<pre><code>spring.application.name=spring-cloud-eureka-server
+server.port=12345
+
+management.endpoints.web.exposure.include=* 
+
+eureka.client.register-with-eureka=false
+
+eureka.client.fetch-registry=false
+
+</code></pre>
+<h3 id="feign-声明接口契约定义一种java强类型接口">Feign 声明接口（契约）：定义一种Java强类型接口</h3>
+<p><strong>应用名称：person-api</strong></p>
+<pre><code>/**
+ * {@link Person} 服务
+ */
+@FeignClient(value = &quot;person-service&quot;)//服务提供方应用的名称
+public interface PersonService {
+    /**
+     *
+     * @param person {@link Person}
+     * @return if success &lt;code&gt;true&lt;/code&gt;
+     */
+    @PostMapping(value = &quot;/person/save&quot;)
+    boolean save(Person person);
+
+    /**
+     * find all services
+     * @return
+     */
+    @GetMapping(&quot;/person/findAll&quot;)
+    C
+</code></pre>
+<h3 id="feign-客户端调用feign声明接口">Feign 客户端：调用Feign声明接口</h3>
+<p><strong>person-client</strong></p>
+<h4 id="创建客户端controller">创建客户端Controller</h4>
+<pre><code>/**
+ * {@link PersonClientController} 实现 {@link PersonService}
+ */
+@RestController
+public class PersonClientController implements PersonService{
+
+    private final PersonService personService;
+
+    @Autowired
+    public PersonClientController(PersonService personService) {
+        this.personService = personService;
+    }
+
+    @Override
+    public boolean save(@RequestBody Person person) {
+         return personService.save(person);
+    }
+
+    @Override
+    public Collection&lt;Person&gt; findAll() {
+        return personService.findAll();
+    }
+}
+
+</code></pre>
+<h4 id="配置启动类">配置启动类</h4>
+<pre><code>@SpringBootApplication
+@EnableFeignClients(clients = PersonService.class)
+public class PersonClientApplicaiton {
+    public static void main(String[] args) {
+        SpringApplication.run(PersonClientApplicaiton.class, args);
+    }
+} 
+</code></pre>
+<h3 id="配置applicaitonproperties">配置applicaiton.properties</h3>
+<pre><code>spring.application.name=person-client
+server.port==8080
+
+eureka.client.service-url.defaultZone=http://localhost:12345/eureka
+management.endpoints.web.exposure.include=*
+</code></pre>
+<h3 id="feign-服务端不一定强制实现feign声明接口">Feign 服务端：不一定强制实现Feign声明接口</h3>
+<p><strong>person-service</strong></p>
+<pre><code>## 服务提供方的应用名称要和@FeignClient声明对应
+spring.application.name=person-service
+server.port=9090
+
+eureka.client.service-url.defaultZone=http://localhost:12345/eureka
+
+management.endpoints.web.exposure.include=*
+</code></pre>
+<pre><code>@RestController
+public class PersonServiceProvicerController {
+    private Map&lt;Long, Person&gt; persons = new ConcurrentHashMap&lt;&gt;();
+    @PostMapping(value = &quot;/person/save&quot;)
+    public boolean save(@RequestBody Person person) {
+        return persons.put(person.getId(),person)==null;
+    }
+    @GetMapping(value = &quot;/person/findAll&quot;)
+    public Collection&lt;Person&gt; findAll() {
+        return persons.values();
+    }
+}
+</code></pre>
+<blockquote>
+<p>调用顺序：person-client-&gt;person-service</p>
+</blockquote>
+<p>person-api中定义了<code>@FeignClient(value = &quot;person-service&quot;)</code>，person-service实际上是一个服务器提供方的应用名称</p>
+<p>person-client和person-service两个应用注册到Eureka</p>
+<p>person-client 可以感知person-serivce应用存在的，并且Spring Cloud帮助解析<code>person-service</code>,因此person-client调用时路由到了person-service</p>
+<h2 id="整合netfix-ribbon">整合Netfix Ribbon</h2>
+<h3 id="关闭eureka注册">关闭Eureka注册</h3>
+<h4 id="调整person-client关闭eureka">调整person client关闭Eureka</h4>
+<h4 id="定义ribbon的服务列表服务名称person-service">定义Ribbon的服务列表(服务名称person-service)</h4>
+<p>application.properties</p>
+<pre><code>ribbon.eureka.enabled=false
+</code></pre>
+<h4 id="定义ribbon的服务列表服务名称person-service-2">定义Ribbon的服务列表(服务名称person-service)</h4>
+<p>application.properties</p>
+<pre><code>person-service.ribbon.listOfServers=http://localhost:9090
+</code></pre>
+<h3 id="自定义ribbon规则">自定义Ribbon规则</h3>
+<p>实现IRule</p>
+<pre><code>public class FirstServerForeverRule extends AbstractLoadBalancerRule {
+    @Override
+    public void initWithNiwsConfig(IClientConfig iClientConfig) {
+
+    }
+
+    @Override
+    public Server choose(Object o) {
+        Server server = null;
+        ILoadBalancer loadBalancer = getLoadBalancer();
+        List&lt;Server&gt; allServers = loadBalancer.getAllServers();
+
+        return allServers.get(0);
+    }
+}
+
+</code></pre>
+<h4 id="暴露自定义实现为spring-bean">暴露自定义实现为Spring Bean</h4>
+<pre><code>@Bean
+public FirstServerForeverRule firstServerForeverRule(){
+    return new FirstServerForeverRule();
+}
+</code></pre>
+<h4 id="激活这个配置">激活这个配置</h4>
+<pre><code>@RibbonClient(value = &quot;person-service&quot;, configuration = PersonClientApplicaiton.class)
+</code></pre>
+<h3 id="整合netfix-hystrix">整合Netfix Hystrix</h3>
+<pre><code>@FeignClient(value = &quot;person-service&quot;, fallback = PersonServiceCallback.class)//服务提供方应用的名称
+public interface PersonService {
+    /**
+     *
+     * @param person {@link Person}
+     * @return if success &lt;code&gt;true&lt;/code&gt;
+     */
+    @PostMapping(value = &quot;/person/save&quot;)
+    boolean save(Person person);
+
+    /**
+     * find all services
+     * @return
+     */
+    @GetMapping(value = &quot;/person/findAll&quot;)
+    Collection&lt;Person&gt; findAll();
+}
+
+</code></pre>
+<pre><code>/**
+ * {@link PersonService} fallback实现
+ */
+public class PersonServiceCallback implements PersonService {
+    @Override
+    public boolean save(Person person) {
+        return false;
+    }
+
+    @Override
+    public Collection&lt;Person&gt; findAll() {
+        return Collections.emptyList();
+    }
+}
+</code></pre>
+<pre><code>@EnableHystrix
+</code></pre>
+<h3 id="总结">总结</h3>
+<p>Feign 弱化了调用Service细节，Feign的API暴露URI</p>
+<p>Feign作为客户端</p>
+<p>Ribbon作为负载均衡</p>
+<p>Eureka作为注册中心</p>
+<p>Zuul作为网关</p>
+<p>Security作为OAuth2认证</p>
+
+            </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://k-21d.github.io/tag/1XPYrRrJC/" class="tag">
+                    微服务
+                  </a>
+                
+              </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://k-21d.github.io/post/spring-cloud-hystrix/">
+                  <h3 class="post-title">
+                    Spring Cloud Hystrix
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+
+<script type="application/javascript">
+
+AOS.init();
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>

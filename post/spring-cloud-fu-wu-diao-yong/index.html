@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>Spring Cloud 服务调用 | 学习博客</title>
+<meta name="description" content="Java Blog">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://k-21d.github.io/favicon.ico?v=1586108481108">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://k-21d.github.io/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://k-21d.github.io">
+        <img src="https://k-21d.github.io/images/avatar.png?v=1586108481108" class="site-logo">
+        <h1 class="site-title">学习博客</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="https://k-21d.github.io" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      Java Blog
+    </div>
+    <div class="site-footer">
+      Powered by k21d | <a class="rss" href="https://k-21d.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">Spring Cloud 服务调用</h2>
+            <div class="post-date">2019-02-16</div>
+            
+            <div class="post-content">
+              <h2 id="分析服务调用引入背景">分析服务调用引入背景</h2>
+<p><code>@LoadBalanced</code> <code>RestTemplate</code> 限制</p>
+<ul>
+<li>面向 URL 组件，必须依赖于 主机+端口 + URI</li>
+<li>并非接口编程（Spring Cloud中，需要理解应用名称+ 服务 URI）</li>
+</ul>
+<p><code>RestTemplate</code> 不依赖于服务接口，仅关注 REST 响应内容。</p>
+<p>举例：</p>
+<blockquote>
+<pre><code class="language-java">lbRestTemplate.getForObject(&quot;http://&quot; + serviceName + &quot;/say?message=&quot; + message, String.class);
+</code></pre>
+</blockquote>
+<h2 id="主要内容">主要内容</h2>
+<h3 id="spring-cloud-feign-基本用法">Spring Cloud Feign 基本用法</h3>
+<h4 id="spring-cloud-feign-客户端注解-feignclient">Spring Cloud Feign 客户端注解 <code>@FeignClient</code></h4>
+<p>服务（应用）定位</p>
+<blockquote>
+<p>@FeignClient(&quot;${service.name}&quot;) // 服务提供方的应用名称</p>
+</blockquote>
+<p>服务 URI 定位</p>
+<blockquote>
+<p>注意：Spring Cloud Feign 和 OpenFeign 区别</p>
+</blockquote>
+<h5 id="rest-服务端框架纵向比较">REST 服务端框架纵向比较</h5>
+<p>Spring Cloud Feign 是 OpenFeign 扩展，并且使用 Spring MVC 注解来做 URI 映射，比如 <code>@RequestMapping</code> 或 <code>@GetMapping</code> 之类</p>
+<p>OpenFeign：灵感来自于 JAX-RS（Java REST 标准），重复发明轮子。</p>
+<p>JAX-RS：<a href="https://github.com/mercyblitz/jsr/tree/master/REST">Java REST 标准</a>，可移植性高，Jersey（Servlet 容器）、Weblogic</p>
+<table>
+<thead>
+<tr>
+<th>技术栈</th>
+<th>HTTP 方法</th>
+<th>变量路径</th>
+<th>请求参数</th>
+<th>自描述消息</th>
+<th>内容协商</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>JAX-RS</td>
+<td><code>@GET</code></td>
+<td><code>@PathParam</code></td>
+<td><code>@FormParam</code></td>
+<td>@Produces(&quot;application/widgets+xml&quot;)</td>
+<td></td>
+</tr>
+<tr>
+<td>Spring Web MVC</td>
+<td><code>@GetMapping</code></td>
+<td><code>@PathVariable</code></td>
+<td><code>@RequestParam</code></td>
+<td><code>@RequestMapping(produces=&quot;application/widgets+xml&quot;)</code></td>
+<td></td>
+</tr>
+<tr>
+<td>OpenFeign</td>
+<td>@RequestLine(&quot;GET...&quot;)</td>
+<td><code>@Param</code></td>
+<td><code>@Param</code></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Spring Cloud Feign</td>
+<td><code>@GetMapping</code></td>
+<td><code>@PathVariable</code></td>
+<td><code>@RequestParam</code></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>zuul IP:port/<span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>s</mi><mi>e</mi><mi>r</mi><mi>v</mi><mi>i</mi><mi>c</mi><msub><mi>e</mi><mi>n</mi></msub><mi>a</mi><mi>m</mi><mi>e</mi><mi mathvariant="normal">/</mi></mrow><annotation encoding="application/x-tex">service_name/</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault">s</span><span class="mord mathdefault">e</span><span class="mord mathdefault" style="margin-right:0.02778em;">r</span><span class="mord mathdefault" style="margin-right:0.03588em;">v</span><span class="mord mathdefault">i</span><span class="mord mathdefault">c</span><span class="mord"><span class="mord mathdefault">e</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.151392em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">n</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mord mathdefault">a</span><span class="mord mathdefault">m</span><span class="mord mathdefault">e</span><span class="mord">/</span></span></span></span>uri</p>
+</blockquote>
+<h4 id="rest-核心概念java-技术描述">REST 核心概念（Java 技术描述）</h4>
+<h5 id="请求映射">请求映射</h5>
+<p><code>@RequestMapping</code></p>
+<h5 id="请求参数处理">请求参数处理</h5>
+<p><code>@RequestParam</code></p>
+<h5 id="请求主题处理">请求主题处理</h5>
+<p><code>@RequestBody</code></p>
+<h5 id="响应处理">响应处理</h5>
+<p><code>@ResponseBody</code></p>
+<p><code>@ResponseStatus</code></p>
+<p><code>@ResponseBody</code> + <code>@ResponseStatus</code> &lt;= <code>ResponseEntity</code></p>
+<h5 id="自描述消息">自描述消息</h5>
+<p><code>@RequestMapping(produces=&quot;application/widgets+xml&quot;)</code></p>
+<h5 id="内容协商">内容协商</h5>
+<p><code>ContentNegotiationManager</code></p>
+<p>理论知识：https://developer.mozilla.org/en-US/docs/Web/HTTP/Content_negotiation</p>
+<h4 id="整合-spring-cloud-feign">整合 Spring Cloud Feign</h4>
+<h5 id="增加-spring-cloud-feign-依赖">增加 Spring Cloud Feign 依赖</h5>
+<pre><code class="language-xml">        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-cloud-starter-openfeign&lt;/artifactId&gt;
+        &lt;/dependency&gt;
+</code></pre>
+<h5 id="整合-enablefeignclients">整合 <code>@EnableFeignClients</code></h5>
+<pre><code class="language-java">@SpringBootApplication // 标准 Spring Boot 应用
+@EnableDiscoveryClient // 激活服务发现客户端
+@EnableScheduling
+@EnableFeignClients
+public class SpringCloudClientApplication {
+
+    public static void main(String[] args) {
+        new SpringApplicationBuilder(SpringCloudClientApplication.class)
+                .web(WebApplicationType.SERVLET)
+                .run(args);
+    }
+}
+</code></pre>
+<h5 id="整合-feignclient">整合 <code>@FeignClient</code></h5>
+<p>之前实现</p>
+<pre><code class="language-java">    @GetMapping(&quot;/lb/invoke/{serviceName}/say&quot;) // -&gt; /say
+    public String lbInvokeSay(@PathVariable String serviceName,
+                              @RequestParam String message) {
+        // Ribbon RestTemplate 发送请求到服务器
+        // 输出响应
+        return lbRestTemplate.getForObject(&quot;http://&quot; + serviceName + &quot;/say?message=&quot; + message, String.class);
+    }
+</code></pre>
+<p>整合 <code>@FeignClient</code> 实现</p>
+<pre><code class="language-java">@FeignClient(name = &quot;spring-cloud-server-application&quot;)
+public interface SayingService {
+
+    @GetMapping(&quot;/say&quot;)
+    String say(@RequestParam(&quot;message&quot;) String message);
+
+}
+</code></pre>
+<p>注入 <code>SayingService</code></p>
+<pre><code class="language-java">    @Autowired
+    private SayingService sayingService;
+</code></pre>
+<p>调用 <code>SayingService</code></p>
+<pre><code class="language-java">    @GetMapping(&quot;/feign/say&quot;)
+    public String feignSay(@RequestParam String message) {
+        return sayingService.say(message);
+    }
+</code></pre>
+<p>启动 ZK 服务器</p>
+<p>启动 <code>spring-cloud-server-application</code></p>
+<p>启动 <code>spring-cloud-client-application</code></p>
+<h4 id="实现自定义-restclient模拟-feignclient">实现自定义 RestClient（模拟 <code>@FeignClient</code>）</h4>
+<h5 id="spring-cloud-feign-编程模型特征">Spring Cloud Feign 编程模型特征</h5>
+<ul>
+<li><code>@Enable</code> 模块驱动</li>
+<li><code>@*Client</code> 绑定客户端接口，指定应用名称</li>
+<li>客户端接口指定请求映射 <code>@RequetMapping</code></li>
+<li>客户端接口指定请求参数 <code>@RequetParam</code>
+<ul>
+<li>必须指定 <code>@RequestParam#value()</code></li>
+</ul>
+</li>
+<li><code>@Autowired</code> 客户端接口是一个代理</li>
+</ul>
+<h5 id="实现-restclient">实现 <code>@RestClient</code></h5>
+<pre><code class="language-java">/**
+ * Rest Client 注解
+ */
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+public @interface RestClient {
+
+    /**
+     * REST 服务应用名称
+     * @return
+     */
+    String name();
+}
+</code></pre>
+<h5 id="实现-restclient-服务接口">实现 <code>@RestClient</code> 服务接口</h5>
+<pre><code class="language-java">@RestClient(name = &quot;spring-cloud-server-application&quot;)
+public interface SayingRestService {
+
+    @GetMapping(&quot;/say&quot;)
+    String say(@RequestParam(&quot;message&quot;) String message);
+
+}
+</code></pre>
+<h5 id="实现-enable-模块">实现 <code>@Enable</code> 模块</h5>
+<pre><code class="language-java">@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+@Documented
+@Import(RestClientsRegistrar.class)
+public @interface EnableRestClient {
+
+    /**
+     * 指定 @RestClient 接口
+     * @return
+     */
+    Class&lt;?&gt;[] clients() default {};
+}
+</code></pre>
+<h5 id="实现-restclientsregistrar">实现 <code>RestClientsRegistrar</code></h5>
+<ul>
+<li>指定 <code>@RestClient</code> 服务接口
+<ul>
+<li>识别 <code>@RestClient</code></li>
+<li>过滤所有 <code>@RequestMapping</code> 方法</li>
+</ul>
+</li>
+<li>将 <code>@RestClient</code> 服务接口注册 Bean
+<ul>
+<li>
+<h2 id="restclient-服务接口形成代理实现"><code>@RestClient</code> 服务接口形成代理实现</h2>
+</li>
+</ul>
+</li>
+</ul>
+
+            </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://k-21d.github.io/post/spring-cloud-fu-wu-rong-duan/">
+                  <h3 class="post-title">
+                    Spring Cloud 服务熔断
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+
+<script type="application/javascript">
+
+AOS.init();
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>

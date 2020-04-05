@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>Spring Cloud Netflix Ribbon | 学习博客</title>
+<meta name="description" content="Java Blog">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://k-21d.github.io/favicon.ico?v=1586108481108">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://k-21d.github.io/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://k-21d.github.io">
+        <img src="https://k-21d.github.io/images/avatar.png?v=1586108481108" class="site-logo">
+        <h1 class="site-title">学习博客</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="https://k-21d.github.io" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      Java Blog
+    </div>
+    <div class="site-footer">
+      Powered by k21d | <a class="rss" href="https://k-21d.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">Spring Cloud Netflix Ribbon</h2>
+            <div class="post-date">2018-12-08</div>
+            
+            <div class="post-content">
+              <h2 id="eureka-高可用架构">Eureka 高可用架构</h2>
+<h3 id="高可用注册中心集群">高可用注册中心集群</h3>
+<p>只需要增加 Eureka 服务器注册URL：</p>
+<pre><code class="language-properties">## Eureka Server 服务 URL,用于客户端注册
+eureka.client.serviceUrl.defaultZone=\
+  http://localhost:9090/eureka,http://localhost:9091/eureka
+</code></pre>
+<p>如果 Eureka 客户端应用配置多个 Eureka 注册服务器，那么默认情况只有第一台<strong>可用</strong>的服务器，存在注册信息。</p>
+<p>如果 第一台<strong>可用</strong>的 Eureka 服务器 Down 掉了，那么 Eureka 客户端应用将会选择下一台<strong>可用</strong>的 Eureka 服务器。</p>
+<h4 id="配置源码eurekaclientconfigbean">配置源码（EurekaClientConfigBean）</h4>
+<p>配置项 <code>eureka.client.serviceUrl</code> 实际映射的字段为 <code>serviceUrl</code> `，它是 Map 类型，Key 为自定义，默认值“defaultZone”，value 是需要配置的Eureka 注册服务器URL。</p>
+<pre><code class="language-java">private Map&lt;String, String&gt; serviceUrl = new HashMap&lt;&gt;();
+
+{
+  this.serviceUrl.put(DEFAULT_ZONE, DEFAULT_URL);
+}
+</code></pre>
+<p>value 可以是多值字段，通过“,” 分割：</p>
+<pre><code class="language-java">String serviceUrls = this.serviceUrl.get(myZone);
+if (serviceUrls == null || serviceUrls.isEmpty()) {
+   serviceUrls = this.serviceUrl.get(DEFAULT_ZONE);
+}
+if (!StringUtils.isEmpty(serviceUrls)) {
+   final String[] serviceUrlsSplit = StringUtils.commaDelimitedListToStringArray(serviceUrls);
+}
+</code></pre>
+<h3 id="获取注册信息时间间隔">获取注册信息时间间隔</h3>
+<p>Eureka 客户端需要获取 Eureka 服务器注册信息，这个方便服务调用。</p>
+<p>Eureka 客户端：<code>EurekaClient</code>,关联应用集合：<code>Applications</code></p>
+<p>单个应用信息：<code>Application</code>，关联多个应用实例</p>
+<p>单个应用实例：<code>InstanceInfo</code></p>
+<p>当 Eureka 客户端需要调用具体某个服务时，比如<code>user-service-consumer</code> 调用<code>user-service-provider</code>，<code>user-service-provider</code>实际对应对象是<code>Application</code>,关联了许多应用实例(<code>InstanceInfo</code>)。</p>
+<p>如果应用<code>user-service-provider</code>的应用实例发生变化时，那么<code>user-service-consumer</code>是需要感知的。比如：<code>user-service-provider</code>机器从10 台降到了5台，那么，作为调用方的<code>user-service-consumer</code>需要知道这个变化情况。可是这个变化过程，可能存在一定的延迟，可以通过调整注册信息时间间隔来减少错误。</p>
+<h4 id="具体配置项">具体配置项</h4>
+<pre><code class="language-properties">## 调整注册信息的获取周期，默认值：30秒
+eureka.client.registryFetchIntervalSeconds = 5
+</code></pre>
+<h3 id="实例信息复制时间间隔">实例信息复制时间间隔</h3>
+<p>具体就是客户端信息的上报到 Eureka 服务器时间。当 Eureka 客户端应用上报的频率越频繁，那么 Eureka 服务器的应用状态管理一致性就越高。</p>
+<h4 id="具体配置项-2">具体配置项</h4>
+<pre><code>## 调整客户端应用状态信息上报的周期
+eureka.client.instanceInfoReplicationIntervalSeconds = 5
+</code></pre>
+<blockquote>
+<p>Eureka 的应用信息获取的方式：拉模式</p>
+<p>Eureka 的应用信息上报的方式：推模式</p>
+</blockquote>
+<h3 id="实例id">实例Id</h3>
+<p>从 Eureka Server Dashboard 里面可以看到具体某个应用中的实例信息，比如：</p>
+<pre><code>UP (2) - 192.168.1.103:user-service-provider:7075 , 192.168.1.103:user-service-provider:7078
+</code></pre>
+<p>其中，它们命名模式：<code>${hostname}:${spring.application.name}:${server.port}</code></p>
+<h3 id="实例类eurekainstanceconfigbean">实例类：<code>EurekaInstanceConfigBean</code></h3>
+<h4 id="配置项">配置项</h4>
+<pre><code class="language-properties">## Eureka 应用实例的ID
+eureka.instance.instanceId = ${spring.application.name}:${server.port}
+</code></pre>
+<h3 id="实例端点映射">实例端点映射</h3>
+<h3 id="源码位置eurekainstanceconfigbean">源码位置：<code>EurekaInstanceConfigBean</code></h3>
+<ul>
+<li>
+<pre><code class="language-java">private String statusPageUrlPath = &quot;/info&quot;;
+</code></pre>
+</li>
+</ul>
+<h3 id="配置项-2">配置项</h3>
+<pre><code class="language-properties">## Eureka 客户端应用实例状态 URL
+eureka.instance.statusPageUrlPath = /health
+</code></pre>
+<h3 id="eureka服务端高可用">Eureka服务端高可用</h3>
+<h3 id="构建-eureka-服务器相互注册">构建 Eureka 服务器相互注册</h3>
+<h4 id="eureka-server-1-profile-peer1">Eureka Server 1 -&gt; Profile : peer1</h4>
+<h5 id="配置项-3">配置项</h5>
+<pre><code class="language-properties">### Eureka Server 应用名称
+spring.application.name = spring-cloud-eureka-server
+### Eureka Server 服务端口
+server.port= 9090
+### 取消服务器自我注册
+eureka.client.register-with-eureka=true
+### 注册中心的服务器，没有必要再去检索服务
+eureka.client.fetch-registry = true
+## Eureka Server 服务 URL,用于客户端注册
+## 当前 Eureka 服务器 向 9091（Eureka 服务器） 复制数据
+eureka.client.serviceUrl.defaultZone=\
+  http://localhost:9091/eureka
+</code></pre>
+<h4 id="eureka-server-2-profile-peer2">Eureka Server 2 -&gt; Profile : peer2</h4>
+<h5 id="配置项-4">配置项</h5>
+<pre><code class="language-properties">### Eureka Server 应用名称
+spring.application.name = spring-cloud-eureka-server
+### Eureka Server 服务端口
+server.port= 9091
+### 取消服务器自我注册
+eureka.client.register-with-eureka=true
+### 注册中心的服务器，没有必要再去检索服务
+eureka.client.fetch-registry = true
+## Eureka Server 服务 URL,用于客户端注册
+## 当前 Eureka 服务器 向 9090（Eureka 服务器） 复制数据
+eureka.client.serviceUrl.defaultZone=\
+  http://localhost:9090/eureka
+</code></pre>
+<p>通过<code>--spring.profiles.active=peer1</code> 和 <code>--spring.profiles.active=peer2</code> 分别激活 Eureka Server 1 和 Eureka Server 2</p>
+<p>Eureka Server 1 里面的replicas 信息：</p>
+<table>
+<thead>
+<tr>
+<th>registered-replicas</th>
+<th>http://localhost:9091/eureka/</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>Eureka Server 2 里面的replicas 信息：</p>
+<table>
+<thead>
+<tr>
+<th>registered-replicas</th>
+<th>http://localhost:9090/eureka/</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2 id="spring-resttemplate">Spring RestTemplate</h2>
+<h3 id="http消息装换器httpmessageconvertor">HTTP消息装换器：HttpMessageConvertor</h3>
+<p>自义定实现</p>
+<p>编码问题</p>
+<p><strong>切换序列化/反序列化协议</strong></p>
+<h3 id="http-client-适配工厂clienthttprequestfactory">HTTP Client 适配工厂：ClientHttpRequestFactory</h3>
+<p>这个方面主要考虑大家的使用 HttpClient 偏好：</p>
+<ul>
+<li>Spring 实现
+<ul>
+<li>SimpleClientHttpRequestFactory</li>
+</ul>
+</li>
+<li>HttpClient
+<ul>
+<li>HttpComponentsClientHttpRequestFactory</li>
+</ul>
+</li>
+<li>OkHttp
+<ul>
+<li>OkHttp3ClientHttpRequestFactory</li>
+<li>OkHttpClientHttpRequestFactory</li>
+</ul>
+</li>
+</ul>
+<h4 id="举例说明">举例说明</h4>
+<pre><code class="language-java">RestTemplate restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory()); // HTTP Client
+</code></pre>
+<p><strong>切换HTTP 通讯实现，提升性能</strong></p>
+<h3 id="http-请求拦截器clienthttprequestinterceptor">HTTP 请求拦截器：ClientHttpRequestInterceptor</h3>
+<p><strong>加深RestTemplate 拦截过程的</strong></p>
+<h2 id="整合netflix-ribbon">整合Netflix Ribbon</h2>
+<p><code>RestTemplate</code>增加一个<code>LoadBalancerInterceptor</code>，调用Netflix 中的<code>LoadBalander</code>实现，根据 Eureka 客户端应用获取目标应用 IP+Port 信息，轮训的方式调用。</p>
+<h3 id="实际请求客户端">实际请求客户端</h3>
+<ul>
+<li>LoadBalancerClient
+<ul>
+<li>RibbonLoadBalancerClient</li>
+</ul>
+</li>
+</ul>
+<h3 id="负载均衡上下文">负载均衡上下文</h3>
+<ul>
+<li>LoadBalancerContext
+<ul>
+<li>RibbonLoadBalancerContext</li>
+</ul>
+</li>
+</ul>
+<h3 id="负载均衡器">负载均衡器</h3>
+<ul>
+<li>ILoadBalancer
+<ul>
+<li>BaseLoadBalancer</li>
+<li>DynamicServerListLoadBalancer</li>
+<li>ZoneAwareLoadBalancer</li>
+<li>NoOpLoadBalancer</li>
+</ul>
+</li>
+</ul>
+<h3 id="负载均衡规则">负载均衡规则</h3>
+<h4 id="核心规则接口">核心规则接口</h4>
+<ul>
+<li>IRule
+<ul>
+<li>随机规则：RandomRule</li>
+<li>最可用规则：BestAvailableRule</li>
+<li>轮训规则：RoundRobinRule</li>
+<li>重试实现：RetryRule</li>
+<li>客户端配置：ClientConfigEnabledRoundRobinRule</li>
+<li>可用性过滤规则：AvailabilityFilteringRule</li>
+<li>RT权重规则：WeightedResponseTimeRule</li>
+<li>规避区域规则：ZoneAvoidanceRule</li>
+</ul>
+</li>
+</ul>
+<h3 id="ping-策略">PING 策略</h3>
+<h4 id="核心策略接口">核心策略接口</h4>
+<ul>
+<li>IPingStrategy</li>
+</ul>
+<h4 id="ping-接口">PING 接口</h4>
+<ul>
+<li>IPing
+<ul>
+<li>NoOpPing</li>
+<li>DummyPing</li>
+<li>PingConstant</li>
+<li>PingUrl</li>
+</ul>
+</li>
+</ul>
+<h5 id="discovery-client-实现">Discovery Client 实现</h5>
+<ul>
+<li>NIWSDiscoveryPing</li>
+</ul>
+
+            </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://k-21d.github.io/tag/1XPYrRrJC/" class="tag">
+                    微服务
+                  </a>
+                
+              </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://k-21d.github.io/post/java-8-yi-bu-bing-fa-bian-cheng/">
+                  <h3 class="post-title">
+                    Java 8 异步并发编程
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+
+<script type="application/javascript">
+
+AOS.init();
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>

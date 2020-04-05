@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>SpringApplication | 学习博客</title>
+<meta name="description" content="Java Blog">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://k-21d.github.io/favicon.ico?v=1586108481108">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://k-21d.github.io/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://k-21d.github.io">
+        <img src="https://k-21d.github.io/images/avatar.png?v=1586108481108" class="site-logo">
+        <h1 class="site-title">学习博客</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="https://k-21d.github.io" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      Java Blog
+    </div>
+    <div class="site-footer">
+      Powered by k21d | <a class="rss" href="https://k-21d.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">SpringApplication</h2>
+            <div class="post-date">2018-08-26</div>
+            
+            <div class="post-content">
+              <h3 id="自定义-springapplication">自定义 SpringApplication</h3>
+<h4 id="springapplication"><code>SpringApplication</code></h4>
+<p><code>SpringApplication</code> Spring Boot 驱动 Spring 应用上下文的引导类</p>
+<pre><code class="language-java">@SpringBootConfiguration
+@EnableAutoConfiguration
+@ComponentScan(excludeFilters = {
+		@Filter(type = FilterType.CUSTOM, classes = TypeExcludeFilter.class),
+		@Filter(type = FilterType.CUSTOM, classes = AutoConfigurationExcludeFilter.class) })
+public @interface SpringBootApplication {
+    ...
+}
+</code></pre>
+<p><code>@ComponentScan</code>: 它是版本引入的？ Spring Framework 3.1</p>
+<p><code>@EnableAutoConfiguration</code>: 激活自动装配 <code>@Enable</code> -&gt; <code>@Enable</code> 开头的</p>
+<ul>
+<li><code>@EnableWebMvc</code></li>
+<li><code>@EnableTransactionManagement</code></li>
+<li><code>@EnableAspectJAutoProxy</code></li>
+<li><code>@EnableAsync</code></li>
+</ul>
+<p><code>@SpringBootConfiguration</code> : 等价于 <code>@Configuration</code> -&gt; Configuration Class 注解</p>
+<h4 id="component-的派生性"><code>@Component</code> 的“派生性”</h4>
+<p><code>@Component</code> -&gt; <code>@ComponentScan</code></p>
+<p>处理类 -&gt; <code>ConfigurationClassParser</code></p>
+<p>扫描类 -&gt;</p>
+<ul>
+<li>
+<p><code>ClassPathBeanDefinitionScanner</code></p>
+<ul>
+<li>
+<p><code>ClassPathScanningCandidateComponentProvider</code></p>
+<pre><code class="language-java">	protected void registerDefaultFilters() {
+		this.includeFilters.add(new AnnotationTypeFilter(Component.class));
+    	...
+	}
+</code></pre>
+<p>Dubbo <code>@Service</code> -&gt; 2.5.7 -&gt; <code>new AnnotationTypeFilter(Service.class);</code></p>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="spring-注解编程模型"><a href="https://github.com/spring-projects/spring-framework/wiki/Spring-Annotation-Programming-Model">Spring 注解编程模型</a></h4>
+<ul>
+<li>
+<p><code>@Component</code></p>
+<ul>
+<li>
+<p><code>@Service</code></p>
+<pre><code class="language-java">@Component
+public @interface Service {
+    ...
+}
+</code></pre>
+</li>
+<li>
+<p><code>@Repository</code></p>
+<pre><code class="language-java">@Component
+public @interface Repository {
+    ...
+}
+</code></pre>
+</li>
+<li>
+<p><code>@Controller</code></p>
+<pre><code class="language-java">@Component
+public @interface Controller {
+    ...
+}
+</code></pre>
+</li>
+<li>
+<p><code>@Configuration</code></p>
+<pre><code class="language-java">@Component
+public @interface Configuration {
+	...
+}
+</code></pre>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="spring-模式注解stereotype-annotations">Spring 模式注解：Stereotype Annotations</h4>
+<h5 id="spring-注解驱动示例">Spring 注解驱动示例</h5>
+<p>注解驱动上下文 <code>AnnotationConfigApplicationContext</code> ， Spring Framework 3.0 开始引入的</p>
+<pre><code class="language-java">@Configuration
+public class SpringAnnotationDemo {
+
+    public static void main(String[] args) {
+
+        //   XML 配置文件驱动       ClassPathXmlApplicationContext
+        // Annotation 驱动
+        // 找 BeanDefinition
+        // @Bean @Configuration
+        AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+        // 注册一个 Configuration Class = SpringAnnotationDemo
+        context.register(SpringAnnotationDemo.class);
+        // 上下文启动
+        context.refresh();
+
+        System.out.println(context.getBean(SpringAnnotationDemo.class));
+
+    }
+}
+</code></pre>
+<p><code>@SpringBootApplication</code> 标注当前一些功能</p>
+<ul>
+<li><code>@SpringBootApplication</code>
+<ul>
+<li><code>@SpringBootConfiguration</code>
+<ul>
+<li><code>@Configuration</code>
+<ul>
+<li><code>@Component</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p><code>SpringApplication</code> Spring Boot 应用的引导</p>
+<p>基本写法</p>
+<pre><code class="language-java">SpringApplication springApplication = new SpringApplication(MicroservicesProjectApplication.class);
+        Map&lt;String,Object&gt; properties = new LinkedHashMap&lt;&gt;();
+        properties.put(&quot;server.port&quot;,0);
+        springApplication.setDefaultProperties(properties);
+        springApplication.run(args);
+</code></pre>
+<h4 id="springapplicationbuilder"><code>SpringApplicationBuilder</code></h4>
+<pre><code class="language-java">        new SpringApplicationBuilder(MicroservicesProjectApplication.class) // Fluent API
+                // 单元测试是 PORT = RANDOM
+                .properties(&quot;server.port=0&quot;)  // 随机向 OS 要可用端口
+                .run(args);
+</code></pre>
+<h4 id="spring-boot-引导示例">Spring Boot 引导示例</h4>
+<pre><code class="language-java">@SpringBootApplication
+public class MicroservicesProjectApplication {
+
+    public static void main(String[] args) {
+        SpringApplication springApplication = new SpringApplication(MicroservicesProjectApplication.class);
+        Map&lt;String,Object&gt; properties = new LinkedHashMap&lt;&gt;();
+        properties.put(&quot;server.port&quot;,0);
+        springApplication.setDefaultProperties(properties);
+        ConfigurableApplicationContext context = springApplication.run(args);
+        // 有异常？
+        System.out.println(context.getBean(MicroservicesProjectApplication.class));
+    }
+}
+</code></pre>
+<h4 id="调整示例为-非-web-程序">调整示例为 非 Web 程序</h4>
+<pre><code class="language-java">@SpringBootApplication
+public class MicroservicesProjectApplication {
+
+    public static void main(String[] args) {
+        SpringApplication springApplication = new SpringApplication(MicroservicesProjectApplication.class);
+        Map&lt;String, Object&gt; properties = new LinkedHashMap&lt;&gt;();
+        properties.put(&quot;server.port&quot;, 0);
+        springApplication.setDefaultProperties(properties);
+        // 设置为 非 web 应用
+        springApplication.setWebApplicationType(WebApplicationType.NONE);
+        ConfigurableApplicationContext context = springApplication.run(args);
+        // 有异常？
+        System.out.println(context.getBean(MicroservicesProjectApplication.class));
+        // 输出当前 Spring Boot 应用的 ApplicationContext 的类名
+        System.out.println(&quot;当前 Spring 应用上下文的类：&quot; + context.getClass().getName());
+    }
+}
+</code></pre>
+<p>输出结果：</p>
+<pre><code>当前 Spring 应用上下文的类：org.springframework.context.annotation.AnnotationConfigApplicationContext
+</code></pre>
+<h3 id="配置-spring-boot-源">配置 Spring Boot 源</h3>
+<h3 id="springappliation-类型推断">SpringAppliation 类型推断</h3>
+<p>当不加以设置 Web 类型，那么它采用推断：</p>
+<p>-&gt; <code>SpringAppliation()</code> -&gt; <code>deduceWebApplicationType()</code> 第一次推断为 <code>WebApplicationType.SERVLET</code></p>
+<ul>
+<li><code>WebApplicationType.NONE</code> : 非 Web 类型
+<ul>
+<li><code>Servlet</code> 不存在</li>
+<li>Spring Web 应用上下文 <code>ConfigurableWebApplicationContext</code>  不存在
+<ul>
+<li><code>spring-boot-starter-web</code> 不存在</li>
+<li><code>spring-boot-starter-webflux</code> 不存在</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><code>WebApplicationType.REACTIVE</code> : Spring WebFlux
+<ul>
+<li><code>DispatcherHandler</code>
+<ul>
+<li><code>spring-boot-starter-webflux</code> 存在</li>
+</ul>
+</li>
+<li><code>Servlet</code> 不存在
+<ul>
+<li><code>spring-boot-starter-web</code> 不存在</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><code>WebApplicationType.SERVLET</code> : Spring MVC
+<ul>
+<li><code>spring-boot-starter-web</code> 存在</li>
+</ul>
+</li>
+</ul>
+<h4 id="人工干预-web-类型">人工干预 Web 类型</h4>
+<p>设置 webApplicationType 属性 为 <code>WebApplicationType.NONE</code></p>
+<h3 id="spring-boot-事件">Spring Boot 事件</h3>
+<p>Spring 事件</p>
+<p>Spring 内部发送事件</p>
+<ul>
+<li><code>ContextRefreshedEvent</code>
+<ul>
+<li><code>ApplicationContextEvent</code>
+<ul>
+<li><code>ApplicationEvent</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p><code>refresh()</code> -&gt; <code>finishRefresh()</code> -&gt;  <code>publishEvent(new ContextRefreshedEvent(this));</code></p>
+<ul>
+<li><code>ContextClosedEvent</code>
+<ul>
+<li><code>ApplicationContextEvent</code>
+<ul>
+<li><code>ApplicationEvent</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p><code>close()</code> -&gt; <code>doClose()</code> -&gt; <code>publishEvent(new ContextClosedEvent(this));</code></p>
+<p>自定义事件</p>
+<p><code>PayloadApplicationEvent</code></p>
+<p>Spring 事件 都是 <code>ApplicationEvent</code> 类型</p>
+<p>发送 Spring 事件通过  <code>ApplicationEventMulticaster#multicastEvent(ApplicationEvent, ResolvableType)</code></p>
+<p>Spring 事件的类型 <code>ApplicationEvent</code></p>
+<p>Spring 事件监听器 <code>ApplicationListener</code></p>
+<p>Spring 事件广播器 <code>ApplicationEventMulticaster</code></p>
+<ul>
+<li>实现类：<code>SimpleApplicationEventMulticaster</code></li>
+</ul>
+<p>Spring 事件理解为消息</p>
+<p><code>ApplicationEvent</code> 相当于消息内容</p>
+<p><code>ApplicationListener</code> 相当于消息消费者、订阅者</p>
+<p><code>ApplicationEventMulticaster</code> 相当于消息生产者、发布者</p>
+<h4 id="spring-boot-事件监听示例">Spring Boot 事件监听示例</h4>
+<pre><code class="language-java">@EnableAutoConfiguration
+public class SpringBootEventDemo {
+
+    public static void main(String[] args) {
+        new SpringApplicationBuilder(SpringBootEventDemo.class)
+                .listeners(event -&gt; { // 增加监听器
+                    System.err.println(&quot;监听到事件 ： &quot; + event.getClass().getSimpleName());
+                })
+                .run(args)
+                .close();
+        ; // 运行
+    }
+}
+</code></pre>
+<ol>
+<li>ApplicationStartingEvent（1）</li>
+<li>ApplicationEnvironmentPreparedEvent（2）</li>
+<li>ApplicationPreparedEvent（3）</li>
+<li>ContextRefreshedEvent</li>
+<li>ServletWebServerInitializedEvent</li>
+<li>ApplicationStartedEvent（4）</li>
+<li>ApplicationReadyEvent（5）</li>
+<li>ContextClosedEvent</li>
+<li>ApplicationFailedEvent (特殊情况)（6）</li>
+</ol>
+<p>Spring Boot 事件监听器</p>
+<pre><code class="language-properties">org.springframework.context.ApplicationListener=\
+org.springframework.boot.ClearCachesApplicationListener,\
+org.springframework.boot.builder.ParentContextCloserApplicationListener,\
+org.springframework.boot.context.FileEncodingApplicationListener,\
+org.springframework.boot.context.config.AnsiOutputApplicationListener,\
+org.springframework.boot.context.config.ConfigFileApplicationListener,\
+org.springframework.boot.context.config.DelegatingApplicationListener,\
+org.springframework.boot.context.logging.ClasspathLoggingApplicationListener,\
+org.springframework.boot.context.logging.LoggingApplicationListener,\
+org.springframework.boot.liquibase.LiquibaseServiceLocatorApplicationListener
+</code></pre>
+<p><code>ConfigFileApplicationListener</code> 监听 <code>ApplicationEnvironmentPreparedEvent</code> 事件</p>
+<p>从而加载 <code>application.properties</code> 或者 <code>application.yml</code> 文件</p>
+<p>Spring Boot 很多组件依赖于 Spring Boot 事件监听器实现，本质是 Spring Framework 事件/监听机制</p>
+<p><code>SpringApplication</code> 利用</p>
+<ul>
+<li>Spring 应用上下文（<code>ApplicationContext）</code>生命周期控制 注解驱动 Bean</li>
+<li>Spring 事件/监听（<code>ApplicationEventMulticaster</code>）机制加载或者初始化组件</li>
+</ul>
+<p>q1：webApplicationType分为三种都有什么实用地方</p>
+<p>q2：框架底层的事件是单线程么？业务实现是否可以使用事件去实现？如果使用事件实现会不会是不是会有性能问题？</p>
+<pre><code class="language-java">public class SimpleApplicationEventMulticaster extends AbstractApplicationEventMulticaster {
+
+	@Nullable
+	private Executor taskExecutor;
+    ...
+}
+</code></pre>
+
+            </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://k-21d.github.io/tag/1XPYrRrJC/" class="tag">
+                    微服务
+                  </a>
+                
+              </div>
+            
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+
+<script type="application/javascript">
+
+AOS.init();
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>

@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>Spring Web MVC 视图技术 | 学习博客</title>
+<meta name="description" content="Java Blog">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://k-21d.github.io/favicon.ico?v=1586108481108">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://k-21d.github.io/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://k-21d.github.io">
+        <img src="https://k-21d.github.io/images/avatar.png?v=1586108481108" class="site-logo">
+        <h1 class="site-title">学习博客</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="https://k-21d.github.io" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      Java Blog
+    </div>
+    <div class="site-footer">
+      Powered by k21d | <a class="rss" href="https://k-21d.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">Spring Web MVC 视图技术</h2>
+            <div class="post-date">2018-08-26</div>
+            
+            <div class="post-content">
+              <h3 id="bean-生命周期">Bean 生命周期</h3>
+<p>实例化 -&gt; Bean Class -&gt; Bean Object</p>
+<p>初始化前 -&gt; Bean before/pre init()</p>
+<ul>
+<li><code>org.springframework.beans.factory.config.BeanPostProcessor#postProcessBeforeInitialization</code></li>
+</ul>
+<p>初始化 -&gt; init()</p>
+<ul>
+<li><code>org.springframework.beans.factory.InitializingBean#afterPropertiesSet()</code></li>
+</ul>
+<p>初始化后</p>
+<ul>
+<li><code>org.springframework.beans.factory.config.BeanPostProcessor#postProcessAfterInitialization()</code></li>
+</ul>
+<p>销毁</p>
+<ul>
+<li><code>org.springframework.beans.factory.DisposableBean#destroy()</code></li>
+</ul>
+<h2 id="主要内容">主要内容</h2>
+<h3 id="thymeleaf-视图技术">Thymeleaf 视图技术</h3>
+<h4 id="渲染上下文模型-model">渲染上下文（模型） Model</h4>
+<ul>
+<li>Spring Web MVC
+<ul>
+<li>接口类型
+<ul>
+<li>Model</li>
+<li>ModelMap</li>
+<li>ModelAndView
+<ul>
+<li>Model  -&gt; ModelMap</li>
+<li>View</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>注解类型
+<ul>
+<li><code>@ModelAttrtibute</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="el-表达式">EL 表达式</h4>
+<ul>
+<li>字符值</li>
+<li>多种数据类型</li>
+<li>逻辑表达式
+<ul>
+<li>if else</li>
+</ul>
+</li>
+<li>迭代表达式
+<ul>
+<li>for each / while</li>
+</ul>
+</li>
+<li>反射
+<ul>
+<li>Java Reflection</li>
+<li>CGLib</li>
+</ul>
+</li>
+</ul>
+<h3 id="视图解析">视图解析</h3>
+<h3 id="模板寻址">模板寻址</h3>
+<p>prefix + view-name + suffix</p>
+<p>-&gt;</p>
+<pre><code>classpath:/templates/thymeleaf/index.dota2
+</code></pre>
+<pre><code class="language-java">view.setUrl(getPrefix() + viewName + getSuffix())
+</code></pre>
+<h4 id="模板缓存">模板缓存</h4>
+<p>默认 Cache = true</p>
+<p>Cache = false -&gt; 设置缓存时间</p>
+<h3 id="spring-mvc-模板渲染逻辑">Spring MVC 模板渲染逻辑</h3>
+<p>Spring MVC 核心总控制器 <code>DispatcherServlet</code></p>
+<ul>
+<li>
+<p>C ：<code>DispatcherServlet</code></p>
+</li>
+<li>
+<p>M</p>
+<ul>
+<li>
+<p>Spring MVC（部分）</p>
+<ul>
+<li>Model / ModelMap / ModelAndView(Model 部分)</li>
+<li><code>@ModelAttribute</code></li>
+</ul>
+</li>
+<li>
+<p>模板引擎（通常）</p>
+<ul>
+<li>
+<p>通用的方式</p>
+<ul>
+<li>模板上下文
+<ul>
+<li>内建/内嵌自己工具变量</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>JSP 内置（ built-in ）九大变量</p>
+<ul>
+<li>Servlet Scope 上下文（Spring <code>@Scope</code>）
+<ul>
+<li>PageContext（page 变量）
+<ul>
+<li>关注当前页面</li>
+<li>A forward B
+<ul>
+<li>A 变量只能 A 页面使用，不能共享给 B</li>
+<li>A t 和 B t 可以采用同名变量，同时使用</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Servlet Request（请求上下文） - <code>WebApplicationContext#SCOPE_REQUEST</code>
+<ul>
+<li>关注当前请求
+<ul>
+<li>A forward B
+<ul>
+<li>A 请求变量可以用于 B 页面</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Servlet Session（会话上下文） - <code>WebApplicationContext#SCOPE_SESSION</code>
+<ul>
+<li>关注当前会话
+<ul>
+<li>A forward / redirect B
+<ul>
+<li>A 请求变量可以用于 B 页面</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Servlet ServletContext（应用上下文） - <code>WebApplicationContext#SCOPE_APPLICATION</code>
+<ul>
+<li>关注当前应用
+<ul>
+<li>用户 A 和 用户 B 会话可以共享</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>JSP 内置变量( JSP = Servlet )
+<ul>
+<li>out（Writer = ServletResponse#getWriter()）</li>
+<li>exception ( Throwable)</li>
+<li>config( ServletConfig )</li>
+<li>page ( Jsp Servlet 对象)</li>
+<li>response（ServletResponse)</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>Thymeleaf 内置变量</p>
+<p><code>StandardExpressionObjectFactory</code> -&gt; 构建 <code>IExpressionContext</code></p>
+<ul>
+<li>上下文（模型）</li>
+<li>#strings</li>
+<li>#numbers</li>
+<li>...</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>V：</p>
+<ul>
+<li>
+<p>视图对象</p>
+<ul>
+<li>
+<p>Servlet</p>
+<ul>
+<li><code>RequestDispatcher#forward</code></li>
+<li><code>RequestDispatcher#include</code></li>
+<li><code>HttpServletResponse#sendRedirect</code></li>
+</ul>
+</li>
+<li>
+<p>Spring MVC</p>
+<ul>
+<li><code>View</code>
+<ul>
+<li>forward:
+<ul>
+<li><code>InternalResourceView</code></li>
+</ul>
+</li>
+<li>redirect:
+<ul>
+<li><code>RedirectView</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>Struts</p>
+<ul>
+<li><code>Action</code>
+<ul>
+<li><code>ForwardAction</code></li>
+<li><code>RedirectAction</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>视图处理对象</p>
+<ul>
+<li>
+<p>Spring MVC</p>
+<ul>
+<li>
+<p>*.do -&gt; <code>DispatcherServlet</code> -&gt; <code>Controller</code> -&gt; <code>View</code> -&gt; <code>ViewResolver</code> -&gt; <code>View#render</code> -&gt; HTML -&gt; <code>HttpServletResponse</code></p>
+<ul>
+<li>
+<p>Thymeleaf</p>
+<ul>
+<li><code>ViewResolver</code> -&gt; <code>ThymeleafViewResolver</code></li>
+<li><code>View</code> -&gt; <code>ThymeleafView</code>
+<ul>
+<li>通过模板名称解析模板资源（<code>ClassPathResource</code>）
+<ul>
+<li><code>TemplateResolution</code></li>
+</ul>
+</li>
+<li>读取资源，并且渲染内容 HTML
+<ul>
+<li><code>IEngineContext</code></li>
+<li><code>ProcessorTemplateHandler</code></li>
+</ul>
+</li>
+<li>HTML 内容输出到 Response</li>
+</ul>
+</li>
+<li>源码路径
+<ul>
+<li><code>org.thymeleaf.TemplateEngine#process(org.thymeleaf.TemplateSpec, org.thymeleaf.context.IContext, java.io.Writer)</code></li>
+<li><code>org.thymeleaf.engine.TemplateManager#parseAndProcess</code></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>JSP</p>
+<pre><code class="language-xml">&lt;bean id=&quot;viewResolver&quot; class=&quot;org.springframework.web.servlet.view.InternalResourceViewResolver&quot;&gt;
+    &lt;property name=&quot;viewClass&quot; value=&quot;org.springframework.web.servlet.view.JstlView&quot;/&gt;
+    &lt;property name=&quot;prefix&quot; value=&quot;/WEB-INF/jsp/&quot;/&gt;
+    &lt;property name=&quot;suffix&quot; value=&quot;.jsp&quot;/&gt;
+&lt;/bean&gt;
+</code></pre>
+<ul>
+<li><code>ViewResolver</code> -&gt;<code>InternalResourceViewResolver</code></li>
+<li><code>View</code> -&gt; <code>JstlView</code>
+<ul>
+<li>Foward -&gt; <code>RequestDispatcher</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>Struts</p>
+<ul>
+<li>*.do -&gt; <code>ActionServlet</code> -&gt; Action -&gt; ForwardAction -&gt; RequestDispatcher -&gt; JSP（Servlet） -&gt; HTML -&gt; <code>HttpServletResponse</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="学习技巧">学习技巧</h4>
+<h5 id="学会配置代码">学会配置代码</h5>
+<p>假设需要了解的技术是 thymeleaf -&gt; thymeleaf Properties -&gt; <code>ThymeleafProperties</code></p>
+<p>第一步：找到 <code>@ConfigurationProperties</code>，确认前缀</p>
+<pre><code class="language-java">@ConfigurationProperties(prefix = &quot;spring.thymeleaf&quot;)
+public class ThymeleafProperties {
+    
+}
+</code></pre>
+<p>比如：“spring.thymeleaf”</p>
+<p>第二步：进一步确认，是否字段和属性名一一对应</p>
+<pre><code class="language-properties">spring.thymeleaf.cache
+spring.thymeleaf.mode=HTML
+</code></pre>
+<pre><code class="language-java">@ConfigurationProperties(prefix = &quot;spring.thymeleaf&quot;)
+public class ThymeleafProperties {
+    ...
+	private boolean cache = true;
+    ...
+    private String mode = &quot;HTML&quot;;
+    ...
+}
+</code></pre>
+<p><code>MessageSource</code> + Properties = <code>MessageSourceProperties</code></p>
+<p>配置项前缀 - <code>spring.messages</code></p>
+<h5 id="学会打断点">学会打断点</h5>
+<p><code>DispatcherServlet#doDispatch</code>  -&gt; 拦截请求</p>
+<p><code>Controller</code>  -&gt; 执行业务，并且控制视图</p>
+<p><code>DispatcherServlet#resolveViewName</code> -&gt; 视图解析</p>
+<p><code>DispatcherServlet#render</code> -&gt; 视图渲染</p>
+<h3 id="国际化">国际化</h3>
+<p><code>Locale</code></p>
+<h4 id="spring-mvc">Spring MVC</h4>
+<ul>
+<li>Locale
+<ul>
+<li>Servlet
+<ul>
+<li>ServletRequest#getLocale()
+<ul>
+<li><code>Accept-Language: en,zh;q=0.9,zh-TW;q=0.8</code></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><code>LocaleContextHolder</code>
+<ul>
+<li>来自于
+<ul>
+<li><code>DispatcherServlet</code>
+<ul>
+<li><code>FrameworkServlet#initContextHolders</code></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>存储是<code>ThreadLocal</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="spring-boot">Spring Boot</h4>
+<ul>
+<li>
+<p><code>MessageSource</code></p>
+<ul>
+<li><code>MessageSourceAutoConfiguration</code>
+<ul>
+<li><code>MessageSourceProperties</code>
+<ul>
+<li>message.properties</li>
+<li>message_en.properties</li>
+<li>message_zh.properties</li>
+<li>message_zh_CN.properties</li>
+<li>message_zh_TW.properties</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>Thymeleaf</p>
+<ul>
+<li>#key =&gt; messageSource.get</li>
+</ul>
+</li>
+</ul>
+<p>JSP 为什么 Spring 抛弃</p>
+<ul>
+<li>
+<p>Java EE 和 Spring 竞争关系的</p>
+</li>
+<li>
+<p>Spring 想独立门户</p>
+<ul>
+<li>WebFlux
+<ul>
+<li>Servlet 3.1</li>
+<li>Reactor +Netty</li>
+</ul>
+</li>
+<li><code>@Controller</code> 、<code>@RequestParam</code>
+<ul>
+<li>Spring Web MVC</li>
+<li>Spring WebFlux</li>
+<li>不再看到 Servlet API
+<ul>
+<li>ServletRequest</li>
+<li>ServletResponse</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>JSP -&gt; JSP 模板 -&gt; 翻译 Servlet Java 源文件 -&gt; 编译 Servlet Class -&gt; Servlet 加载 -&gt; Servlet 执行（字节码执行）</p>
+<p>Thymeleaf -&gt; Thymeleaf 模板 -&gt; 解释执行模板表达式（动态运行时）</p>
+
+            </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://k-21d.github.io/tag/1XPYrRrJC/" class="tag">
+                    微服务
+                  </a>
+                
+              </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://k-21d.github.io/post/springapplication/">
+                  <h3 class="post-title">
+                    SpringApplication
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+
+<script type="application/javascript">
+
+AOS.init();
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>

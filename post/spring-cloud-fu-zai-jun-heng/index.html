@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>Spring Cloud 负载均衡 | 学习博客</title>
+<meta name="description" content="Java Blog">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://k-21d.github.io/favicon.ico?v=1586108481108">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://k-21d.github.io/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://k-21d.github.io">
+        <img src="https://k-21d.github.io/images/avatar.png?v=1586108481108" class="site-logo">
+        <h1 class="site-title">学习博客</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="https://k-21d.github.io" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      Java Blog
+    </div>
+    <div class="site-footer">
+      Powered by k21d | <a class="rss" href="https://k-21d.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">Spring Cloud 负载均衡</h2>
+            <div class="post-date">2019-02-02</div>
+            
+            <div class="post-content">
+              <h3 id="resttemplate-原理与扩展">RestTemplate 原理与扩展</h3>
+<p>Spring 核心 HTTP 消息转换器 <code>HttpMessageConverter</code></p>
+<p>REST 自描述消息：媒体类型（<code>MediaType</code>）， text/html;text/xml;application/json</p>
+<p>HTTP 协议特点：纯文本协议，自我描述</p>
+<ul>
+<li>
+<p>REST 服务端</p>
+</li>
+<li>
+<p>REST 客户端</p>
+<p>反序列化：文本（通讯） -&gt; 对象（程序使用）</p>
+<p>序列化：对象 -&gt; 文本</p>
+</li>
+</ul>
+<h4 id="httpmessageconverter-分析"><code>HttpMessageConverter</code> 分析</h4>
+<h5 id="判断是否可读可写">判断是否可读可写</h5>
+<pre><code class="language-java">public interface HttpMessageConverter&lt;T&gt; {
+
+	boolean canRead(Class&lt;?&gt; clazz, @Nullable MediaType mediaType);
+
+	
+	boolean canWrite(Class&lt;?&gt; clazz, @Nullable MediaType mediaType);
+}
+</code></pre>
+<p>clazz = Person.class</p>
+<h5 id="当前支持的媒体类型">当前支持的媒体类型</h5>
+<pre><code class="language-java">public interface HttpMessageConverter&lt;T&gt; {	
+	List&lt;MediaType&gt; getSupportedMediaTypes();
+}
+</code></pre>
+<p><code>MappingJackson2HttpMessageConverter</code></p>
+<h5 id="反序列化">反序列化</h5>
+<pre><code class="language-java">public interface HttpMessageConverter&lt;T&gt; {	
+	T read(Class&lt;? extends T&gt; clazz, HttpInputMessage inputMessage)
+			throws IOException, HttpMessageNotReadableException;
+}
+</code></pre>
+<p>特别提醒：Spring Web MVC  依赖 Servlet，Spring 在早期设计时，它就考虑到了去 Servlet 化。</p>
+<p>HttpInputMessage 类似于 HttpServletRequest</p>
+<pre><code class="language-java">public interface HttpInputMessage extends HttpMessage {
+
+	InputStream getBody() throws IOException;
+    
+	// 来自于 HttpMessage
+	HttpHeaders getHeaders();
+
+}
+</code></pre>
+<p>类比 <code>HttpServletRequest</code></p>
+<pre><code class="language-java">public interface HttpServletRequest {    
+    
+    // 来自于 ServletRequest
+	public ServletInputStream getInputStream() throws IOException;
+    
+    public Enumeration&lt;String&gt; getHeaders(String name);
+ 
+    public Enumeration&lt;String&gt; getHeaderNames();
+}
+</code></pre>
+<p><code>RestTemplate</code>利用 <code>HttpMessageConverter</code> 对一定媒体类型序列化和反序列化</p>
+<p>JSON</p>
+<p>XML</p>
+<p>TEXT</p>
+<p>它不依赖于 Servlet API，它自定义实现</p>
+<p>对于服务端而言，将 Servlet API 适配成 <code>HttpInputMessage</code> 以及 <code>HttpOutputMessage</code></p>
+<p><code>RestTemplate</code> 对应多个 <code>HttpMessageConverter</code>，那么如何决策正确媒体类型。</p>
+<h4 id="resttemplate-在-httpmessageconverter-设计">RestTemplate 在 <code>HttpMessageConverter</code> 设计</h4>
+<pre><code class="language-java">public class RestTemplate extends InterceptingHttpAccessor implements RestOperations {
+    ...
+    // List 形式
+    private final List&lt;HttpMessageConverter&lt;?&gt;&gt; messageConverters = new ArrayList&lt;&gt;();
+    ...
+    public RestTemplate() {
+		this.messageConverters.add(new ByteArrayHttpMessageConverter());
+		this.messageConverters.add(new StringHttpMessageConverter());
+		this.messageConverters.add(new ResourceHttpMessageConverter(false));
+		this.messageConverters.add(new SourceHttpMessageConverter&lt;&gt;());
+		this.messageConverters.add(new AllEncompassingFormHttpMessageConverter());
+
+		if (romePresent) {
+			this.messageConverters.add(new AtomFeedHttpMessageConverter());
+			this.messageConverters.add(new RssChannelHttpMessageConverter());
+		}
+
+		if (jackson2XmlPresent) {
+			this.messageConverters.add(new MappingJackson2XmlHttpMessageConverter());
+		}
+		else if (jaxb2Present) {
+			this.messageConverters.add(new Jaxb2RootElementHttpMessageConverter());
+		}
+
+		if (jackson2Present) {
+			this.messageConverters.add(new MappingJackson2HttpMessageConverter());
+		}
+		else if (gsonPresent) {
+			this.messageConverters.add(new GsonHttpMessageConverter());
+		}
+		else if (jsonbPresent) {
+			this.messageConverters.add(new JsonbHttpMessageConverter());
+		}
+
+		if (jackson2SmilePresent) {
+			this.messageConverters.add(new MappingJackson2SmileHttpMessageConverter());
+		}
+		if (jackson2CborPresent) {
+			this.messageConverters.add(new MappingJackson2CborHttpMessageConverter());
+		}
+	}
+}
+</code></pre>
+<ul>
+<li>添加内建 <code>HttpMessageConvertor</code> 实现</li>
+<li>有条件地添加第三方库<code>HttpMessageConvertor</code> 整合实现</li>
+</ul>
+<blockquote>
+<p>问题场景一： http://localhost:8080/person -&gt; XML 而不是 Jackson</p>
+<p>Postman 、<code>curl</code> 场景最为明显</p>
+<p>没有传递请求头，无从选择媒体类型</p>
+<p>假设 Person 既能被 XML 读取，有能被 JSON 读取</p>
+</blockquote>
+<blockquote>
+<p>Content-Type: text/html; charset=utf-8</p>
+</blockquote>
+<h4 id="resttemplate-扩展">RestTemplate 扩展</h4>
+<h5 id="扩展-http-客户端">扩展 HTTP 客户端</h5>
+<ul>
+<li>ClientHttpRequestFactory
+<ul>
+<li>Spring 实现
+<ul>
+<li>SimpleClientHttpRequestFactory</li>
+</ul>
+</li>
+<li>HttpClient
+<ul>
+<li>HttpComponentsClientHttpRequestFactory</li>
+</ul>
+</li>
+<li>OkHttp
+<ul>
+<li>OkHttp3ClientHttpRequestFactory</li>
+<li>OkHttpClientHttpRequestFactory</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>微服务要使用轻量级的协议，比如 REST</p>
+<p>Spring Cloud <code>RestTemplate</code> 核心的调用器</p>
+<p>企业整合模型（叫好，不叫座） -&gt; Spring Integration</p>
+<p>DDD</p>
+<h4 id="resttemplate-整合-zookeeper"><code>RestTemplate</code> 整合 Zookeeper</h4>
+<h3 id="netflix-ribbon">Netflix Ribbon</h3>
+<p><code>@LoadBalanced</code> 利用注解来过滤，注入方和声明方同时使用</p>
+<h4 id="负载均衡客户端">负载均衡客户端</h4>
+<p><code>ServiceInstanceChooser</code></p>
+<p><code>LoadBalancerClient</code></p>
+<h4 id="负载均衡上下文">负载均衡上下文</h4>
+<p><code>LoadBalancerContext</code></p>
+<h4 id="负载均衡规则">负载均衡规则</h4>
+<p><code>ILoadBalancer</code></p>
+<p>Q: @Qualifier为什么选择了自定义的RestTemplate而不是lbRestTemplate呢？是按照先后set的吗</p>
+<p><code>@Qualifier</code> “父”注解，<code>@Qualifier</code> , <code>@LoadBalanced</code></p>
+<p>@Autowired</p>
+<p>Collection<Object></p>
+<p>List<Object></p>
+<p>Set<Object></p>
+
+            </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://k-21d.github.io/post/spring-cloud-fu-wu-fa-xian/">
+                  <h3 class="post-title">
+                    Spring Cloud 服务发现
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+
+<script type="application/javascript">
+
+AOS.init();
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>

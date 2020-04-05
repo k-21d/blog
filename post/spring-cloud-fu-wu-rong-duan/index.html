@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>Spring Cloud 服务熔断 | 学习博客</title>
+<meta name="description" content="Java Blog">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://k-21d.github.io/favicon.ico?v=1586108481108">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://k-21d.github.io/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://k-21d.github.io">
+        <img src="https://k-21d.github.io/images/avatar.png?v=1586108481108" class="site-logo">
+        <h1 class="site-title">学习博客</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="https://k-21d.github.io" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      Java Blog
+    </div>
+    <div class="site-footer">
+      Powered by k21d | <a class="rss" href="https://k-21d.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">Spring Cloud 服务熔断</h2>
+            <div class="post-date">2019-02-10</div>
+            
+            <div class="post-content">
+              <h3 id="spring-cloud-hystrix-client">Spring Cloud Hystrix Client</h3>
+<blockquote>
+<p>注意：方法签名</p>
+<ul>
+<li>访问限定符</li>
+<li>方法返回类型</li>
+<li>方法名称</li>
+<li>方法参数
+<ul>
+<li>方法数量</li>
+<li>方法类型+顺序</li>
+<li><s>方法名称（编译时预留，IDE，Debug）</s></li>
+</ul>
+</li>
+</ul>
+</blockquote>
+<h3 id="实现服务熔断future">实现服务熔断（Future）</h3>
+<h4 id="低级版本无容错实现">低级版本（无容错实现）</h4>
+<pre><code class="language-java">    private final ExecutorService executorService = Executors.newSingleThreadExecutor();
+
+    /**
+     * 简易版本
+     *
+     * @param message
+     * @return
+     * @throws InterruptedException
+     */
+    @GetMapping(&quot;/say2&quot;)
+    public String say2(@RequestParam String message) throws Exception {
+        Future&lt;String&gt; future = executorService.submit(() -&gt; {
+            return doSay2(message);
+        });
+        // 100 毫秒超时
+        String returnValue = future.get(100, TimeUnit.MILLISECONDS);
+        return returnValue;
+    }
+</code></pre>
+<h4 id="低级版本带容错实现">低级版本+（带容错实现）</h4>
+<pre><code class="language-java">    private final ExecutorService executorService = Executors.newSingleThreadExecutor();
+
+    /**
+     * 简易版本
+     *
+     * @param message
+     * @return
+     * @throws InterruptedException
+     */
+    @GetMapping(&quot;/say2&quot;)
+    public String say2(@RequestParam String message) throws Exception {
+        Future&lt;String&gt; future = executorService.submit(() -&gt; {
+            return doSay2(message);
+        });
+        // 100 毫秒超时
+        String returnValue = null;
+        try {
+            returnValue = future.get(100, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            // 超级容错 = 执行错误 或 超时
+            returnValue = errorContent(message);
+        }
+        return returnValue;
+    }
+</code></pre>
+<h4 id="中级版本">中级版本</h4>
+<pre><code class="language-java">    /**
+     * 中级版本
+     *
+     * @param message
+     * @return
+     * @throws InterruptedException
+     */
+    @GetMapping(&quot;/middle/say&quot;)
+    public String middleSay(@RequestParam String message) throws Exception {
+        Future&lt;String&gt; future = executorService.submit(() -&gt; {
+            return doSay2(message);
+        });
+        // 100 毫秒超时
+        String returnValue = null;
+
+        try {
+            returnValue = future.get(100, TimeUnit.MILLISECONDS);
+        } catch (TimeoutException e) {
+            future.cancel(true); // 取消执行
+            throw e;
+        }
+        return returnValue;
+    }
+</code></pre>
+<pre><code class="language-java">@RestControllerAdvice(assignableTypes = ServerController.class)
+public class CircuitBreakerControllerAdvice {
+
+    @ExceptionHandler
+    public void onTimeoutException(TimeoutException timeoutException,
+                                   Writer writer) throws IOException {
+        writer.write(errorContent(&quot;&quot;)); // 网络 I/O 被容器
+        writer.flush();
+        writer.close();
+    }
+
+    public String errorContent(String message) {
+        return &quot;Fault&quot;;
+    }
+
+}
+</code></pre>
+<h4 id="高级版本无注解实现">高级版本（无注解实现）</h4>
+<pre><code class="language-java">    /**
+     * 高级版本
+     *
+     * @param message
+     * @return
+     * @throws InterruptedException
+     */
+    @GetMapping(&quot;/advanced/say&quot;)
+    public String advancedSay(@RequestParam String message) throws Exception {
+        return doSay2(message);
+    }
+</code></pre>
+<pre><code class="language-java">@Aspect
+@Component
+public class ServerControllerAspect {
+
+    private ExecutorService executorService = newFixedThreadPool(20);
+
+    @Around(&quot;execution(* com.k21d.micro.services.spring.cloud.&quot; +
+            &quot;server.controller.ServerController.advancedSay(..)) &amp;&amp; args(message) &quot;)
+    public Object advancedSayInTimeout(ProceedingJoinPoint point, String message) throws Throwable {
+        Future&lt;Object&gt; future = executorService.submit(() -&gt; {
+            Object returnValue = null;
+            try {
+                returnValue = point.proceed(new Object[]{message});
+            } catch (Throwable ex) {
+            }
+            return returnValue;
+        });
+
+        Object returnValue = null;
+        try {
+            returnValue = future.get(100, TimeUnit.MILLISECONDS);
+        } catch (TimeoutException e) {
+            future.cancel(true); // 取消执行
+            returnValue = errorContent(&quot;&quot;);
+        }
+        return returnValue;
+    }
+
+    public String errorContent(String message) {
+        return &quot;Fault&quot;;
+    }
+
+    @PreDestroy
+    public void destroy() {
+        executorService.shutdown();
+    }
+
+}
+</code></pre>
+<h4 id="高级版本带注解实现">高级版本（带注解实现）</h4>
+<ul>
+<li>Aspect 注解实现</li>
+</ul>
+<pre><code class="language-java">    @Around(&quot;execution(* com.k21d.micro.services.spring.cloud.&quot; +
+            &quot;server.controller.ServerController.advancedSay2(..)) &amp;&amp; args(message) &amp;&amp; @annotation(circuitBreaker)&quot;)
+    public Object advancedSay2InTimeout(ProceedingJoinPoint point,
+                                        String message,
+                                        CircuitBreaker circuitBreaker) throws Throwable {
+        long timeout = circuitBreaker.timeout();
+        return doInvoke(point, message, timeout);
+    }
+</code></pre>
+<ul>
+<li>反射API 实现</li>
+</ul>
+<pre><code class="language-java">    @Around(&quot;execution(* com.k21d.micro.services.spring.cloud.&quot; +
+            &quot;server.controller.ServerController.advancedSay2(..)) &amp;&amp; args(message) &quot;)
+    public Object advancedSay2InTimeout(ProceedingJoinPoint point,
+                                        String message) throws Throwable {
+
+        long timeout = -1;
+        if (point instanceof MethodInvocationProceedingJoinPoint) {
+            MethodInvocationProceedingJoinPoint methodPoint = (MethodInvocationProceedingJoinPoint) point;
+            MethodSignature signature = (MethodSignature) methodPoint.getSignature();
+            Method method = signature.getMethod();
+            CircuitBreaker circuitBreaker = method.getAnnotation(CircuitBreaker.class);
+            timeout = circuitBreaker.timeout();
+        }
+        return doInvoke(point, message, timeout);
+    }
+</code></pre>
+<h4 id="高级版本信号灯实现-单机版限流方案">高级版本（信号灯实现 = 单机版限流方案）</h4>
+<pre><code class="language-java">    @Around(&quot;execution(* com.k21d.micro.services.spring.cloud.&quot; +
+            &quot;server.controller.ServerController.advancedSay3(..))&quot; +
+            &quot; &amp;&amp; args(message)&quot; +
+            &quot; &amp;&amp; @annotation(circuitBreaker) &quot;)
+    public Object advancedSay3InSemaphore(ProceedingJoinPoint point,
+                                          String message,
+                                          SemaphoreCircuitBreaker circuitBreaker) throws Throwable {
+        int value = circuitBreaker.value();
+        if (semaphore == null) {
+            semaphore = new Semaphore(value);
+        }
+        Object returnValue = null;
+        try {
+            if (semaphore.tryAcquire()) {
+                returnValue = point.proceed(new Object[]{message});
+                Thread.sleep(1000);
+            } else {
+                returnValue = errorContent(&quot;&quot;);
+            }
+        } finally {
+            semaphore.release();
+        }
+
+        return returnValue;
+
+    }
+
+</code></pre>
+
+            </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://k-21d.github.io/post/spring-cloud-fu-zai-jun-heng/">
+                  <h3 class="post-title">
+                    Spring Cloud 负载均衡
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+
+<script type="application/javascript">
+
+AOS.init();
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>

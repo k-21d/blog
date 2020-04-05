@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>Spring Cloud 服务发现 | 学习博客</title>
+<meta name="description" content="Java Blog">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://k-21d.github.io/favicon.ico?v=1586108481108">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://k-21d.github.io/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://k-21d.github.io">
+        <img src="https://k-21d.github.io/images/avatar.png?v=1586108481108" class="site-logo">
+        <h1 class="site-title">学习博客</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="https://k-21d.github.io" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      Java Blog
+    </div>
+    <div class="site-footer">
+      Powered by k21d | <a class="rss" href="https://k-21d.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">Spring Cloud 服务发现</h2>
+            <div class="post-date">2019-01-19</div>
+            
+            <div class="post-content">
+              <h2 id="简单对比-eureka">简单对比 Eureka</h2>
+<table>
+<thead>
+<tr>
+<th>比较点</th>
+<th>Eureka</th>
+<th>Zookeeper</th>
+<th>Consul</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>运维熟悉度</td>
+<td>相对陌生</td>
+<td>熟悉</td>
+<td>更陌生</td>
+</tr>
+<tr>
+<td>一致性（CAP）</td>
+<td>AP（最终一致性）</td>
+<td>CP（一致性强）</td>
+<td>AP（最终一致性）</td>
+</tr>
+<tr>
+<td>一致性协议</td>
+<td>HTTP 定时轮训</td>
+<td>ZAB</td>
+<td>RAFT</td>
+</tr>
+<tr>
+<td>通讯方式</td>
+<td>HTTP REST</td>
+<td>自定义协议</td>
+<td>HTTP REST</td>
+</tr>
+<tr>
+<td>更新机制</td>
+<td>Peer 2 Peer（服务器之间） + Scheduler（服务器和客户端）</td>
+<td>ZK Watch</td>
+<td>Agent 监听的方式</td>
+</tr>
+<tr>
+<td>适用规模</td>
+<td>20 K ~ 30 K 实例（节点）</td>
+<td>10K ~ 20K 实例（节点）</td>
+<td>&lt; 3K 实例（节点）</td>
+</tr>
+<tr>
+<td>性能问题</td>
+<td>简单的更新机制、复杂设计、规模较大时 GC 频繁</td>
+<td>扩容麻烦、规模较大时 GC 频繁</td>
+<td>3K 节点以上，更新列表缓慢</td>
+</tr>
+</tbody>
+</table>
+<h2 id="为什么推荐使用-zk-作为-spring-cloud-的基础设施">为什么推荐使用 ZK 作为 Spring Cloud 的基础设施</h2>
+<h3 id="一致性模型">一致性模型</h3>
+<h3 id="维护相对熟悉">维护相对熟悉</h3>
+<h3 id="配置中心和服务注册中心单一化">配置中心和服务注册中心单一化</h3>
+<h5 id="传统的问题">传统的问题</h5>
+<p>Spring Cloud 默认配置</p>
+<p>Eureka 做注册中心</p>
+<p>Git/JDBC 做配置中心</p>
+<h2 id="主要内容">主要内容</h2>
+<h3 id="spring-cloud-discovery-客户端">Spring Cloud Discovery 客户端</h3>
+<h3 id="spring-cloud-discovery-zk-服务器">Spring Cloud Discovery ZK 服务器</h3>
+<h4 id="spring-cloud-增加-zk-依赖">Spring Cloud 增加 ZK 依赖</h4>
+<pre><code class="language-xml">    &lt;dependencies&gt;
+
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+        &lt;/dependency&gt;
+
+        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-cloud-starter-zookeeper-discovery&lt;/artifactId&gt;
+        &lt;/dependency&gt;
+    &lt;/dependencies&gt;
+</code></pre>
+<ul>
+<li>注册发现</li>
+<li>配置管理</li>
+</ul>
+<h4 id="启动-zk3411">启动 ZK（3.4.11）</h4>
+<h4 id="编写引导类">编写引导类</h4>
+<pre><code class="language-java">@SpringBootApplication
+@EnableDiscoveryClient // 尽可能使用 @EnableDiscoveryClient
+public class ZkDSClientApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(ZkDSClientApplication.class, args);
+    }
+}
+</code></pre>
+<p>实例一：端口 56517</p>
+<p>ZK ID : fff20552-b4a0-43d8-a9ce-c82096f2005e</p>
+<p>实例二：端口 56577</p>
+<p>ZK ID : 9f4e2c91-4765-4f39-9d4b-2036e8e6c4d4</p>
+<p>ZK 节点路径（/services/spring-cloud-service-discovery-client）</p>
+<p>ZK 服务发现节点规则（/services/{spring.application.name}/{serviceId_UUID}/)</p>
+<p>注册增加 service Id 计算</p>
+<p>获取应该去重</p>
+<pre><code>
+</code></pre>
+<p>Eureka 2.0 不开源，Eureka 1.x 还可以用的</p>
+
+            </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://k-21d.github.io/post/spring-cloud-pei-zhi-guan-li/">
+                  <h3 class="post-title">
+                    Spring Cloud 配置管理
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+
+<script type="application/javascript">
+
+AOS.init();
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>Ubuntu18.04安装JDK8 | 学习博客</title>
+<meta name="description" content="Java Blog">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://k-21d.github.io/favicon.ico?v=1586108481108">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://k-21d.github.io/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://k-21d.github.io">
+        <img src="https://k-21d.github.io/images/avatar.png?v=1586108481108" class="site-logo">
+        <h1 class="site-title">学习博客</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="https://k-21d.github.io" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      Java Blog
+    </div>
+    <div class="site-footer">
+      Powered by k21d | <a class="rss" href="https://k-21d.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">Ubuntu18.04安装JDK8</h2>
+            <div class="post-date">2018-09-08</div>
+            
+            <div class="post-content">
+              <p>Java JDK在linux系统有两个版本，一个开源版本Openjdk，还有一个oracle官方版本jdk，oracle JDK既可以通过添加ppa源命令行安装，也可以去官网下载jdk压缩包安装。下面分别记录一下这三种安装方式的步骤。</p>
+<h2 id="安装openjdk">安装openjdk</h2>
+<p>1、更新软件包列表：</p>
+<pre><code>sudo apt-get update
+</code></pre>
+<p>2、安装openjdk-8-jdk：</p>
+<pre><code>sudo apt-get install openjdk-8-jdk
+
+</code></pre>
+<p>3、查看java版本，看看是否安装成功：</p>
+<pre><code>java -version
+</code></pre>
+<h2 id="命令行方式安装oracle-java-jdk">命令行方式安装oracle Java JDK</h2>
+<p>1、安装依赖包：</p>
+<pre><code>sudo apt-get install python-software-properties
+
+</code></pre>
+<p>2、添加仓库源：</p>
+<pre><code>sudo add-apt-repository ppa:webupd8team/java
+
+</code></pre>
+<p>3、更新软件包列表：</p>
+<pre><code>sudo apt-get update
+
+</code></pre>
+<p>4、安装java JDK：</p>
+<pre><code>sudo apt-get install oracle-java8-installer
+</code></pre>
+<p>5、查看java版本，看看是否安装成功：</p>
+<pre><code>java -version
+</code></pre>
+<h2 id="手动下载压缩包安装oracle-java-jdk">手动下载压缩包安装oracle Java JDK</h2>
+<ol>
+<li>前往oracle Java官网下载JDK</li>
+<li>解压缩到指定目录（以jdk-8u171-linux-x64.tar.gz为例）
+<ul>
+<li>创建目录:<br>
+<code>sudo mkdir /usr/lib/jvm</code></li>
+<li>解压缩到该目录: <code>sudo tar -zxvf jdk-8u171-linux-x64.tar.gz -C /usr/lib/jvm</code></li>
+</ul>
+</li>
+<li>修改环境变量:</li>
+</ol>
+<pre><code>sudo vi ~/.bashrc
+</code></pre>
+<p>在文件末尾追加下面内容：</p>
+<pre><code>#set oracle jdk environment
+export JAVA_HOME=/usr/lib/jvm/jdk1.8.0_171  ## 这里要注意目录要换成自己解压的jdk 目录
+export JRE_HOME=${JAVA_HOME}/jre  
+export CLASSPATH=.:${JAVA_HOME}/lib:${JRE_HOME}/lib  
+export PATH=${JAVA_HOME}/bin:$PATH  
+</code></pre>
+<p>使环境变量马上生效：</p>
+<pre><code>source ~/.bashrc
+</code></pre>
+<ol start="4">
+<li>系统注册此jdk</li>
+</ol>
+<pre><code>sudo update-alternatives --install /usr/bin/java java /usr/lib/jvm/jdk1.8.0_171/bin/java 300
+</code></pre>
+<ol start="5">
+<li>查看java版本，看看是否安装成功：</li>
+</ol>
+<pre><code>java -version
+</code></pre>
+<p>如果你安装了多个版本的jdk，你可以通过以下命令在这些版本之间切换：</p>
+<pre><code>sudo update-alternatives –config java
+</code></pre>
+
+            </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://k-21d.github.io/post/rest-on-spring/">
+                  <h3 class="post-title">
+                    REST On Spring
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+
+<script type="application/javascript">
+
+AOS.init();
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>

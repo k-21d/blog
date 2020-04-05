@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>Java 8 异步并发编程 | 学习博客</title>
+<meta name="description" content="Java Blog">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://k-21d.github.io/favicon.ico?v=1586108481108">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://k-21d.github.io/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://k-21d.github.io">
+        <img src="https://k-21d.github.io/images/avatar.png?v=1586108481108" class="site-logo">
+        <h1 class="site-title">学习博客</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="https://k-21d.github.io" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      Java Blog
+    </div>
+    <div class="site-footer">
+      Powered by k21d | <a class="rss" href="https://k-21d.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">Java 8 异步并发编程</h2>
+            <div class="post-date">2018-11-10</div>
+            
+            <div class="post-content">
+              <h2 id="java-5-前时代">Java 5 前时代</h2>
+<h3 id="并发实现">并发实现</h3>
+<ul>
+<li>Java Green Thread</li>
+<li>Java Native Thread</li>
+</ul>
+<h3 id="编程模型">编程模型</h3>
+<h4 id="thread">Thread</h4>
+<pre><code>        Thread thread = new Thread( new Runnable() {
+            /**
+             * synchronized是编程语言的修饰符号
+             */
+            @Override
+            public void run() {
+                System.out.printf(&quot;[Thread: %s]Hello World....\n&quot;,Thread.currentThread().getName());
+            }
+        },&quot;Sub&quot;);
+        thread.start();
+        System.out.printf(&quot;[Thread:%s]Starting....\n&quot;,Thread.currentThread().getName());
+</code></pre>
+<h4 id="runnable">Runnable</h4>
+<pre><code>public class CompeletableRunnableMain {
+    public static void main(String[] args) {
+        CompetetableRunnable competetableRunnable = new CompetetableRunnable();
+        Thread thread = new Thread(competetableRunnable,&quot;Sub&quot;);
+
+        thread.start();
+        try {
+            //等待线程执行结束，串行操作
+            thread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        System.out.printf(&quot;[Thread: %s]Starting....\n&quot;,Thread.currentThread().getName());
+        System.out.println(competetableRunnable.compeleted);
+    }
+
+
+
+    private static class CompetetableRunnable implements Runnable{
+        private  boolean compeleted;
+        @Override
+        public void run() {
+            System.out.printf(&quot;[Thread: %s]Hello World....\n&quot;,Thread.currentThread().getName());
+            compeleted = true;
+        }
+
+        public boolean isCompeleted() {
+            return compeleted;
+        }
+    }
+}
+
+</code></pre>
+<ul>
+<li>时代局限性
+<ul>
+<li>缺少线程管理的原生支持</li>
+<li>缺少“锁”API</li>
+<li>缺少执行完成的原生支持</li>
+<li>执行结果获取困难</li>
+<li>Double Check Locking 不确定性</li>
+</ul>
+</li>
+</ul>
+<h2 id="java-5时代">Java 5时代</h2>
+<ul>
+<li>并发框架
+<ul>
+<li>J.U.C (java.util.concurrent)</li>
+</ul>
+</li>
+</ul>
+<h3 id="编程模型-2">编程模型</h3>
+<h4 id="executor">Executor</h4>
+<pre><code>        //执行器、线程池(ThreadPoolExecutir)是它的一种实现
+        //线程池是线程复用
+        ExecutorService executor = Executors.newFixedThreadPool(1);
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                System.out.printf(&quot;[Thread: %s]Hello World....\n&quot;,Thread.currentThread().getName());
+            }
+        });
+
+        executor.shutdown();
+</code></pre>
+<h4 id="runnable-callable有返回值">Runnable、Callable(有返回值)</h4>
+<pre><code>        //执行器、线程池(ThreadPoolExecutir)是它的一种实现
+        //线程池是线程复用
+        ExecutorService executorService =
+                Executors.newFixedThreadPool(1);
+        Future&lt;String&gt; future = executorService.submit(new Callable&lt;String&gt;() {
+            @Override
+            public String call() throws Exception {
+                return &quot;[Thread:]&quot;+Thread.currentThread().getName()+&quot;Hello World....&quot;;
+            }
+        });
+        String result = future.get();
+        System.out.println(result);
+        executorService.shutdown();
+</code></pre>
+<h4 id="future">Future</h4>
+<pre><code>        //执行器、线程池(ThreadPoolExecutir)是它的一种实现
+        //线程池是线程复用
+        ExecutorService executorService =
+                Executors.newFixedThreadPool(1);
+        Future&lt;String&gt; future = executorService.submit(new Callable&lt;String&gt;() {
+            @Override
+            public String call() throws Exception {
+                return &quot;[Thread:]&quot;+Thread.currentThread().getName()+&quot;Hello World....&quot;;
+            }
+        });
+        //等待完成
+        while (true){
+           if (future.isDone()){
+               break;
+           }
+        }
+        //Future#get()方法会阻塞当前线程
+        String result = future.get();
+        System.out.println(result);
+        executorService.shutdown();
+</code></pre>
+<h2 id="java-7时代">Java 7时代</h2>
+<ul>
+<li>并行框架
+<ul>
+<li>Fork/Join</li>
+</ul>
+</li>
+</ul>
+<h3 id="编程模型-3">编程模型</h3>
+<h4 id="forkjoinpool">ForkJoinPool</h4>
+<pre><code>        //并行：多核心参与
+        //并发：一同参与
+        //ForkJoin线程池 ForkJoinPool
+        System.out.printf(&quot;当前CPU 处理器数：%d\n&quot;,Runtime.getRuntime().availableProcessors());
+        System.out.printf(&quot;当前公用的ForkJoin线程池 并行数：%d\n&quot;,ForkJoinPool.getCommonPoolParallelism());
+        //与ThreadPoolExecutor 类似
+        ForkJoinPool forkJoinPool = new ForkJoinPool();
+        forkJoinPool.invoke(new RecursiveAction() {
+            @Override
+            protected void compute() {
+                System.out.printf(&quot;[Thread: %s]Hello World....\n&quot;,Thread.currentThread().getName());
+            }
+        });
+        forkJoinPool.shutdown();
+</code></pre>
+<h4 id="forkjointask">ForkJoinTask</h4>
+<h4 id="recursiveaction">RecursiveAction</h4>
+<pre><code>public class ForkJoinDemo2 {
+    public static void main(String[] args) {
+        //并行：多核心参与
+        //并发：一同参与
+        //ForkJoin线程池 ForkJoinPool
+        System.out.printf(&quot;当前CPU 处理器数：%d\n&quot;,Runtime.getRuntime().availableProcessors());
+        System.out.printf(&quot;当前公用的ForkJoin线程池 并行数：%d\n&quot;, ForkJoinPool.getCommonPoolParallelism());
+        //与ThreadPoolExecutor 类似
+        ForkJoinPool forkJoinPool = new ForkJoinPool();
+        List&lt;Integer&gt; nums = Arrays.asList(1,2,3,4,5,6,7,8,9,10);
+        //累加对象
+        LongAdder longAdder = new LongAdder();
+        //RecursiveAction 递归操作
+        AddTask addTask = new AddTask(nums, longAdder);
+
+        forkJoinPool.invoke(addTask);
+        System.out.println(longAdder);
+        forkJoinPool.shutdown();
+    }
+
+
+    private static class AddTask extends RecursiveAction {
+        private final List&lt;Integer&gt; nums ;
+
+        private final LongAdder longAdder;
+
+        private AddTask(List&lt;Integer&gt; nums, LongAdder longAdder) {
+            this.nums = nums;
+            this.longAdder = longAdder;
+        }
+
+        @Override
+        protected void compute() {
+            int size = nums.size();
+            if (size&gt;1){
+                int parts = size/2;
+                //上半部
+                List&lt;Integer&gt; leftPar = nums.subList(0,parts);
+                AddTask leftTask = new AddTask(leftPar, longAdder);
+                //下半部
+                List&lt;Integer&gt; rightPar = nums.subList(parts,size);
+                AddTask rightTask = new AddTask(rightPar, longAdder);
+                invokeAll(leftTask,rightTask);
+            }else {
+                //当前只有一个元素
+                if (size==0){//保护
+                    return;
+                }
+                Integer value = nums.get(0);
+                longAdder.add(value);
+            }
+
+
+
+        }
+    }
+}
+
+</code></pre>
+<ul>
+<li>Future的限制
+<ul>
+<li>无法手动完成</li>
+<li>阻塞式结果返回</li>
+<li>无法链式多个Future</li>
+<li>无法合并多个Future结果</li>
+<li>缺少异常处理</li>
+</ul>
+</li>
+</ul>
+<h2 id="java-8">Java 8</h2>
+<ul>
+<li>异步并行框架
+<ul>
+<li>Fork/Join</li>
+</ul>
+</li>
+</ul>
+<h3 id="编程模型-4">编程模型</h3>
+<h4 id="completionstage">CompletionStage</h4>
+<h4 id="completablefuture">CompletableFuture</h4>
+<pre><code>//        CompletableFuture&lt;String&gt; completableFuture = new CompletableFuture&lt;String&gt;();
+        //1.完成操作,可以被其它线程去做
+//        completableFuture.complete(&quot;hello, world&quot;);
+//        String value = completableFuture.get();
+//
+//        System.out.println(value);
+        //2.异步操作,阻塞操作
+//        CompletableFuture asyncCompletableFuture = CompletableFuture.runAsync(()-&gt;{
+//            System.out.println(&quot;Hello, World&quot;);
+//        });
+//        //仍然是阻塞操作
+//        asyncCompletableFuture.get();
+//
+        //3.supplyAsync异步操作,阻塞操作
+//        CompletableFuture&lt;String&gt; supplyAsynCompletableFuture = CompletableFuture.supplyAsync(()-&gt;{
+//            //获取数据操作，假设来自于数据库
+//            return String.format(&quot;[Thread:%s]:Hello World\n&quot;,Thread.currentThread().getName());
+//        });
+//        String value = supplyAsynCompletableFuture.get();
+//        System.out.println(&quot;vaule= &quot;+value);
+//        System.out.println(&quot;Starting....&quot;);
+        //4.合并操作
+        CompletableFuture combinedCompletableFuture = CompletableFuture.supplyAsync(()-&gt;{
+            //获取数据操作，假设来自于数据库
+            return String.format(&quot;[Thread:%s]:Hello World\n&quot;,Thread.currentThread().getName());
+        }).thenApply(value-&gt;{
+            return value+&quot; -来自于数据库&quot;;
+        }).thenApply(value-&gt;{
+            return value + &quot; at &quot; +LocalDateTime.now();
+        }).thenApply(value-&gt;{
+            System.out.println(value);
+            return value;
+        }).thenRun(()-&gt;{
+            System.out.println(&quot;操作结束&quot;);
+        });
+
+        while (!combinedCompletableFuture.isDone()){
+
+        }
+
+        System.out.println(&quot;Starting....&quot;);
+</code></pre>
+<h2 id="reactive-streams">Reactive Streams</h2>
+<h3 id="核心组件">核心组件</h3>
+<ul>
+<li>Publisher  发布者</li>
+<li>Subscriber 订阅者</li>
+<li>Subscription 订阅内容</li>
+<li>Processor = Publisher + Subscriber</li>
+</ul>
+<p>publisher -&gt; (Subcriber)Processor(Publisher) -&gt; Subsriber</p>
+<ul>
+<li>Spring Cloud Stream/Spring Cloud Stream Data</li>
+<li><a href="https://github.com/reactive-streams/reactive-streams-jvm">Reactive Streams</a></li>
+<li><a href="https://reactivex.io/intro.html">Reactive X </a>：
+<ul>
+<li>asynchronous</li>
+<li>event-based</li>
+<li>observable sequences</li>
+</ul>
+</li>
+</ul>
+<h2 id="前-java-9时代">前 Java 9时代</h2>
+<h3 id="观察者模式java支持">观察者模式：Java支持</h3>
+<pre><code>/**
+ * 观察者模式
+ */
+public class ObserverDemo {
+    public static void main(String[] args) {
+        //第一个缺点：Vector作为底层存储（全线程安全的）
+        //第二个缺点：没有实现泛型
+        //第三个缺点：同步（阻塞）并且顺序倒序
+        MyObservable observable = new MyObservable();
+        observable.addObserver((ob,value)-&gt;{ //int
+            System.out.printf(&quot;观察到的数值：%s\n&quot;,value);
+        });
+        observable.addObserver((ob,value)-&gt;{
+            System.out.printf(&quot;第二个观察者-收到了：%s\n&quot;,value);
+        });
+        //Observable是倒序的
+        observable.setChanged();
+        //通知所有的观察者
+        observable.notifyObservers(124124);
+    }
+
+    private static class MyObservable extends Observable {
+
+        public void setChanged() {
+            super.setChanged();
+        }
+    }
+}
+</code></pre>
+<h3 id="事件监听模式java-beans">事件监听模式：Java Beans</h3>
+<pre><code>/**
+ * 事件监听者模式
+ * {@link EventObject} 标准的事件对象&lt;br/&gt;
+ * {@link EventListener} 标准的时间监听对象&lt;br/&gt;
+ *
+ * @See EventListener
+ */
+public class EventListenerDemo {
+
+    public static void main(String[] args) {
+        Person person = new Person();
+        // Java Beans 规范-&gt; 内省
+        // PropertyChangeEvent 广播源
+        // PropertyChangeListener 注册器
+        PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(person);
+        //1.注册
+        propertyChangeSupport.addPropertyChangeListener(&quot;name&quot;, (event) -&gt; {
+            Person bean = (Person) event.getSource();
+            System.out.printf(&quot;Persion[%s] 的 name属性，老值：%s, 新值：%s /n&quot;,bean,event.getOldValue(),event.getNewValue());
+        });
+        //2.触发事件
+        propertyChangeSupport.firePropertyChange(&quot;name&quot;,null,&quot;k21d&quot;);
+    }
+
+    /**
+     * POJO
+     */
+    private static class Person {
+        private String name;
+        private int age;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+
+        }
+
+        public int getAge() {
+            return age;
+        }
+
+        public void setAge(int age) {
+            this.age = age;
+        }
+    }
+}
+
+</code></pre>
+<h3 id="reactor模式">Reactor模式</h3>
+<h2 id="java-9时代">Java 9时代</h2>
+<h3 id="flow-api">Flow API</h3>
+<ul>
+<li>Publisher<T></li>
+<li>Subscriber<T></li>
+<li>Processor&lt;T,R&gt;</li>
+<li>Subscription</li>
+</ul>
+<pre><code>/**
+ *  {@link SubmissionPublisher}
+ */
+public class SubmissionPublisherDemo {
+
+    public static void main(String[] args) throws InterruptedException {
+        try(SubmissionPublisher&lt;Integer&gt; publisher = new SubmissionPublisher&lt;&gt;()){
+            publisher.subscribe(new IntegerSubcriber(&quot;A&quot;));
+            publisher.subscribe(new IntegerSubcriber(&quot;B&quot;));
+            publisher.subscribe(new IntegerSubcriber(&quot;C&quot;));
+            CompletableFuture&lt;Void&gt; consume = publisher.consume(value -&gt; {
+                System.out.printf(&quot;Thread[%s]: consumes value[%s] \n&quot;,
+                        Thread.currentThread().getName(),
+                        value);
+            }).thenRunAsync(()-&gt;{
+                System.out.printf(&quot;Thread[%s] thenRunAsync \n&quot;,Thread.currentThread().getName());
+            });
+            //提交数据到各个订阅器
+            publisher.submit(100);
+        }
+
+        Thread.currentThread().join(500);
+
+    }
+
+    private static class IntegerSubcriber implements Flow.Subscriber&lt;Integer&gt;{
+
+        private final String name;
+        private Flow.Subscription subscription;
+
+        private IntegerSubcriber(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public void onSubscribe(Flow.Subscription subscription) {
+            System.out.printf(&quot;Thread[%s]: Current Subscriber[%s] subscribes: subscription[%s] \n&quot;,
+                    Thread.currentThread().getName(),
+                    name,
+                    subscription);
+            this.subscription = subscription;
+            subscription.request(1);
+
+        }
+
+        @Override
+        public void onNext(Integer item) {
+            System.out.printf(&quot;Thread[%s]: Current Subscriber[%s] receive: item[%d] \n&quot;,
+                    Thread.currentThread().getName(),
+                    name,
+                    item);
+            subscription.request(1);
+        }
+
+        @Override
+        public void onError(Throwable throwable) {
+            System.err.println(throwable.getMessage());
+        }
+
+        @Override
+        public void onComplete() {
+            System.out.printf(&quot;Thread[%s]: Current Subscriber[%s] is completed \n&quot;,
+                    Thread.currentThread().getName(),
+                    name);
+        }
+    }
+}
+
+</code></pre>
+
+            </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://k-21d.github.io/tag/Gq66X9sYL/" class="tag">
+                    Java
+                  </a>
+                
+              </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://k-21d.github.io/post/spring-cloud-zuul/">
+                  <h3 class="post-title">
+                    Spring Cloud Zuul
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+
+<script type="application/javascript">
+
+AOS.init();
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>

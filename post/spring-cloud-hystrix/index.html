@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>Spring Cloud Hystrix | 学习博客</title>
+<meta name="description" content="Java Blog">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://k-21d.github.io/favicon.ico?v=1586108481108">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://k-21d.github.io/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://k-21d.github.io">
+        <img src="https://k-21d.github.io/images/avatar.png?v=1586108481108" class="site-logo">
+        <h1 class="site-title">学习博客</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="https://k-21d.github.io" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      Java Blog
+    </div>
+    <div class="site-footer">
+      Powered by k21d | <a class="rss" href="https://k-21d.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">Spring Cloud Hystrix</h2>
+            <div class="post-date">2018-10-08</div>
+            
+            <div class="post-content">
+              <h2 id="服务短路circuitbreaker">服务短路(CircuitBreaker)</h2>
+<ul>
+<li>QPS:Query per second</li>
+<li>TPS:Transcation per second</li>
+</ul>
+<p>QPS:经过全链路压测，计算单机极限QPS，集群QPS ️= 单机QPS * 机器数 * 可靠性比率</p>
+<p>全链路压测除了压极限QPS，还有错误数量</p>
+<p>全链路：一个完整的业务流程操作</p>
+<h2 id="spring-cloud-hystrix-client">Spring Cloud Hystrix Client</h2>
+<h3 id="激活hystrix">激活Hystrix</h3>
+<p><code>@EnableHystric</code></p>
+<p>对比其它Java的执行方式</p>
+<h3 id="hystrix">Hystrix</h3>
+<h4 id="annatation方式">Annatation方式</h4>
+<pre><code>private final static Random random = new Random();
+    /**
+     * 当{@link #helloWorld()}方法调用超时或者失败时，fallback方法{@link #errorContent()}
+     * 作为替代返回
+     * @return
+     */
+    @GetMapping(&quot;/hello-world&quot;)
+    @HystrixCommand(fallbackMethod = &quot;errorContent&quot;,
+            commandProperties = {
+                    @HystrixProperty(name=&quot;execution.isolation.thread.timeoutInMilliseconds&quot;, value=&quot;100&quot;)
+            })
+    public String helloWorld() throws InterruptedException {
+        int value = random.nextInt(200);
+        System.out.println(&quot;hello world() costs&quot;+value+&quot;ms&quot;);
+        Thread.sleep (value);
+        return &quot;hello world&quot;;
+    }
+
+    public String errorContent() {
+        return &quot;Fault&quot;;
+    }
+</code></pre>
+<h4 id="编程方式">编程方式</h4>
+<pre><code>    /**
+     * 当{@link #helloWorld2()}方法调用超时或者失败时，fallback方法{@link #errorContent()}
+     * 作为替代返回
+     * @return
+     */
+    @GetMapping(&quot;/hello-world2&quot;)
+    public String helloWorld2(){
+        return new HelloWorldCommand().execute();
+    }
+
+    /**
+     * 编程方法
+     */
+    private class HelloWorldCommand extends com.netflix.hystrix.HystrixCommand&lt;String&gt; {
+
+        protected HelloWorldCommand() {
+            super(HystrixCommandGroupKey.Factory.asKey(&quot;HelloWorld&quot;),100 );
+        }
+        @Override
+        protected String run() throws Exception {
+            int value = random.nextInt(200);
+            System.out.println(&quot;hello world() costs&quot;+value+&quot;ms&quot;);
+            Thread.sleep (value);
+            return &quot;Hello World&quot;;
+        }
+
+        /**
+         * 容错执行
+         * @return
+         */
+        protected String getFallback(){
+            return DemoHystrixController.this.errorContent();
+        }
+    }
+</code></pre>
+<h3 id="future">Future</h3>
+<pre><code>public class FutureDemo {
+    public static void main(String[] args) {
+        Random random = new Random();
+        ExecutorService executorService = Executors.newFixedThreadPool(1);
+        Future&lt;String&gt; future = executorService.submit(() -&gt; {
+            int value = random.nextInt(200);
+            System.out.println(&quot;hello world() costs&quot;+value+&quot;ms&quot;);
+            Thread.sleep (value);
+            return &quot;hello world&quot;;
+        });
+        try {
+            future.get(100, TimeUnit.MILLISECONDS);
+        } catch (Exception  e) {
+            System.err.printf(&quot;超时&quot;);
+        }
+        executorService.shutdown();
+    }
+}
+</code></pre>
+<h3 id="rxjava">RxJava</h3>
+<pre><code>public class RxJavaDemo {
+    public static void main(String[] args) {
+        Random random = new Random();
+        Single.just(&quot;Hello,World&quot;)
+                .subscribeOn(Schedulers.io())
+                .subscribe(new Observer&lt;String&gt;() {
+                    @Override
+                    public void onCompleted() {
+                        System.out.println(&quot;执行结束&quot;);
+                    }
+                    @Override
+                    public void onError(Throwable throwable) {
+                        System.out.println(&quot;熔断保护！&quot;);
+                    }
+                    @Override
+                    public void onNext(String s) {
+                        int value = random.nextInt(500);
+
+                        if (value&gt;300) {
+                            throw new RuntimeException(&quot;time out&quot;);
+                        }
+                        System.out.println(&quot;hello world() costs&quot;+value+&quot;ms&quot;);
+                    }
+                });
+    }
+}
+
+</code></pre>
+<h3 id="health-endpoint">Health Endpoint</h3>
+<pre><code>{
+    &quot;status&quot;: &quot;UP&quot;,
+    &quot;components&quot;: {
+        &quot;discoveryComposite&quot;: {
+            &quot;description&quot;: &quot;Discovery Client not initialized&quot;,
+            &quot;status&quot;: &quot;UNKNOWN&quot;,
+            &quot;components&quot;: {
+                &quot;discoveryClient&quot;: {
+                    &quot;description&quot;: &quot;Discovery Client not initialized&quot;,
+                    &quot;status&quot;: &quot;UNKNOWN&quot;
+                }
+            }
+        },
+        &quot;diskSpace&quot;: {
+            &quot;status&quot;: &quot;UP&quot;,
+            &quot;details&quot;: {
+                &quot;total&quot;: 511900434432,
+                &quot;free&quot;: 160553299968,
+                &quot;threshold&quot;: 10485760
+            }
+        },
+        &quot;hystrix&quot;: {
+            &quot;status&quot;: &quot;UP&quot;
+        },
+        &quot;ping&quot;: {
+            &quot;status&quot;: &quot;UP&quot;
+        },
+        &quot;refreshScope&quot;: {
+            &quot;status&quot;: &quot;UP&quot;
+        }
+    }
+}
+</code></pre>
+<h3 id="激活短路保护">激活短路保护</h3>
+<p><code>@EnableCircuitBreaker</code>激活：@EnableHystrix+Spring Cloud功能</p>
+<p><code>EnableHystrix</code>激活，没有一些Spring Cloud功能</p>
+<h3 id="hystrix-endpointhystrixstream">Hystrix Endpoint(hystrix.stream)</h3>
+<pre><code>data: {
+	&quot;type&quot;: &quot;HystrixThreadPool&quot;,
+	&quot;name&quot;: &quot;DemoHystrixController&quot;,
+	&quot;currentTime&quot;: 1573979167185,
+	&quot;currentActiveCount&quot;: 0,
+	&quot;currentCompletedTaskCount&quot;: 1,
+	&quot;currentCorePoolSize&quot;: 10,
+	&quot;currentLargestPoolSize&quot;: 1,
+	&quot;currentMaximumPoolSize&quot;: 10,
+	&quot;currentPoolSize&quot;: 1,
+	&quot;currentQueueSize&quot;: 0,
+	&quot;currentTaskCount&quot;: 1,
+	&quot;rollingCountThreadsExecuted&quot;: 0,
+	&quot;rollingMaxActiveThreads&quot;: 0,
+	&quot;rollingCountCommandRejections&quot;: 0,
+	&quot;propertyValue_queueSizeRejectionThreshold&quot;: 5,
+	&quot;propertyValue_metricsRollingStatisticalWindowInMilliseconds&quot;: 10000,
+	&quot;reportingHosts&quot;: 1
+}
+</code></pre>
+<h2 id="spring-cloud-hystrix-dashboard">Spring Cloud Hystrix Dashboard</h2>
+<p>激活<code>@EnableHystrixDashboard</code></p>
+
+            </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://k-21d.github.io/tag/1XPYrRrJC/" class="tag">
+                    微服务
+                  </a>
+                
+              </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://k-21d.github.io/post/spring-cloud-netflix-eureka/">
+                  <h3 class="post-title">
+                    Spring Cloud Netflix Eureka
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+
+<script type="application/javascript">
+
+AOS.init();
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>

@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>Spring Cloud Zuul | 学习博客</title>
+<meta name="description" content="Java Blog">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://k-21d.github.io/favicon.ico?v=1586108481108">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://k-21d.github.io/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://k-21d.github.io">
+        <img src="https://k-21d.github.io/images/avatar.png?v=1586108481108" class="site-logo">
+        <h1 class="site-title">学习博客</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="https://k-21d.github.io" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      Java Blog
+    </div>
+    <div class="site-footer">
+      Powered by k21d | <a class="rss" href="https://k-21d.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">Spring Cloud Zuul</h2>
+            <div class="post-date">2018-10-27</div>
+            
+            <div class="post-content">
+              <h2 id="zuul基本使用">Zuul基本使用</h2>
+<ol>
+<li>增加<code>@EnableZuulProxy</code></li>
+</ol>
+<pre><code>@SpringBootApplication
+@EnableZuulProxy
+public class SpringCloudZuulDemoApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(SpringCloudZuulDemoApplication.class, args);
+    }
+}
+</code></pre>
+<ol start="2">
+<li>配置路由规则：<code>zuul.routes.${app-name}=/${prefix}/**</code></li>
+</ol>
+<h2 id="整合ribbon">整合Ribbon</h2>
+<p>启动Eureka-Server和Person-Service</p>
+<p>调用链路：zuul-&gt; person-service<br>
+配置方式</p>
+<pre><code>server.port=7070
+##zuul.routes.${app-name}=/${prefix}/**
+## Zuul配置person-service服务调用
+zuul.routes.person-service=/person-service/**
+
+person-service.ribbon.listOfServers=http://localhost:9090
+
+ribbon.eureka.enabled=false
+</code></pre>
+<p><code>http://localhost:7070/person-service/person/findAll</code><br>
+person-service 的app-url-prefix:/person-service/</p>
+<p>/person/findAll是person-service具体的URI</p>
+<h2 id="整合eureka">整合Eureka</h2>
+<h3 id="引入spring-cloud-starter-eureka依赖">引入spring-cloud-starter-eureka依赖</h3>
+<pre><code>&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-cloud-starter-netflix-eureka-client&lt;/artifactId&gt;
+&lt;/dependency&gt;
+</code></pre>
+<h3 id="激活服务注册-发现客户端">激活服务注册、发现客户端</h3>
+<pre><code>@SpringBootApplication
+@EnableZuulProxy
+@EnableDiscoveryClient
+public class SpringCloudZuulDemoApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(SpringCloudZuulDemoApplication.class, args);
+    }
+}
+</code></pre>
+<h3 id="配置服务注册-发现客户端">配置服务注册、发现客户端</h3>
+<pre><code>## Zuul 服务端口
+server.port=7070
+##zuul.routes.${app-name}=/${prefix}/**
+## Zuul配置person-service服务调用
+zuul.routes.person-service=/person-service/**
+        
+##整合Eureka
+## 目标应用的serviceId=person-service
+eureka.client.service-url.defaultZone=http://localhost:12345/eureka
+</code></pre>
+<h2 id="整合hystrix">整合Hystrix</h2>
+<h3 id="在person-service服务端">在person-service服务端</h3>
+<h4 id="激活hystrix">激活Hystrix</h4>
+<pre><code>@SpringBootApplication
+@EnableEurekaClient
+@EnableHystrix
+public class PersonServiceProdiverApplicaion {
+    public static void main(String[] args) {
+        SpringApplication.run(PersonServiceProdiverApplicaion.class,args);
+    }
+}
+</code></pre>
+<h4 id="配置hystrix规则">配置Hystrix规则</h4>
+<pre><code>@RestController
+public class PersonServiceProvicerController {
+    private Map&lt;Long, Person&gt; persons = new ConcurrentHashMap&lt;&gt;();
+    private final static Random random = new Random();
+
+    @PostMapping(value = &quot;/person/save&quot;)
+    public boolean save(@RequestBody Person person) {
+        return persons.put(person.getId(),person)==null;
+    }
+    @GetMapping(value = &quot;/person/findAll&quot;)
+    @HystrixCommand(fallbackMethod = &quot;fallbackForPersons&quot;,
+        commandProperties = {
+            @HystrixProperty(name = &quot;execution.isolation.thread.timeoutInMilloseconds&quot;,
+            value = &quot;100&quot;)
+        })
+    public Collection&lt;Person&gt; findAll() throws InterruptedException {
+        int value = random.nextInt(200);
+        System.out.println(&quot;time:&quot;+value);
+        Thread.sleep(value);
+        return persons.values();
+    }
+
+    /**
+     * {@link #findAll()}Fallback方法
+     * @return 返回空集合
+     */
+    public Collection&lt;Person&gt; fallbackForPersons(){
+        System.err.println(&quot;fallbackForPersons() is inveked~ &quot;);
+        return Collections.emptyList();
+    }
+}
+
+</code></pre>
+<h2 id="整合feign">整合Feign</h2>
+<h3 id="服务消费端person-client">服务消费端：person-client</h3>
+<h4 id="调用链路">调用链路</h4>
+<p>spring-cloud-zuul-&gt;person-client-&gt;person-service</p>
+<h4 id="person-client注册到eurekaserver">person-client注册到EurekaServer</h4>
+<blockquote>
+<p>spring-cloud-zuul端口：7070</p>
+</blockquote>
+<blockquote>
+<p>person-client端口：8080</p>
+</blockquote>
+<blockquote>
+<p>person-service端口：9090</p>
+</blockquote>
+<blockquote>
+<p>Eureka-service端口：12345</p>
+</blockquote>
+<p>启动<code>person-client</code></p>
+<pre><code>spring.application.name=person-client
+server.port=8080
+eureka.client.service-url.defaultZone=http://localhost:12345/eureka
+management.endpoints.web.exposure.include=*
+</code></pre>
+<h3 id="网关应用spring-cloud-zuul">网关应用：Spring Cloud Zuul</h3>
+<h4 id="增加路由应用到person-client">增加路由应用到person-client</h4>
+<pre><code>spring.application.name=spring-cloud-zuul
+## Zuul 服务端口
+server.port=7070
+##zuul.routes.${app-name}=/${prefix}/**
+## Zuul配置person-service服务调用
+zuul.routes.person-service=/person-service/**
+zuul.routes.person-client=/person-client/**
+##整合Eureka
+## 目标应用的serviceId=person-service
+eureka.client.service-url.defaultZone=http://localhost:12345/eureka
+</code></pre>
+<p>spring-cloud-zuul(7070)-&gt;person-client(8080)-&gt;person-service (9090)</p>
+<p><code>http://localhost:7070/person-client/person/findAll</code></p>
+<ul>
+<li>Ribbon</li>
+</ul>
+<pre><code>spring.application.name=spring-cloud-zuul
+## Zuul 服务端口
+server.port=7070
+##zuul.routes.${app-name}=/${prefix}/**
+## Zuul配置person-service服务调用
+zuul.routes.person-service=/person-service/**
+zuul.routes.person-client=/person-client/**
+person-service.ribbon.listOfServers=http://localhost:9090
+person-client.ribbon.listOfServers=http://localhost:8080
+</code></pre>
+<h2 id="整合config-server">整合Config Server</h2>
+<p>动态配置</p>
+<h3 id="配置服务器spring-cloud-config-server">配置服务器：spring-cloud-config-server</h3>
+<p>调整配置项</p>
+<pre><code>spring.application.name=spring-cloud-config-server
+server.port=10000
+spring.cloud.config.server.git.uri=\
+  file:///${user.dir}/src/main/resources/configs
+
+management.endpoints.web.exposure.include=*
+</code></pre>
+<h4 id="为spring-cloud-zuul增加配置文件">为spring-cloud-zuul增加配置文件</h4>
+<p>三个profile的配置文件：</p>
+<ul>
+<li>zuul.properties</li>
+</ul>
+<pre><code>## 应用spring-cloud-zuul默认配置项(profile为空)
+##zuul.routes.${app-name}=/${prefix}/**
+## Zuul配置person-service服务调用
+zuul.routes.person-service=/person-service/**
+</code></pre>
+<ul>
+<li>zuul-test.properties</li>
+</ul>
+<pre><code>## 应用spring-cloud-zuul默认配置项(test)
+##zuul.routes.${app-name}=/${prefix}/**
+## Zuul配置person-service服务调用
+zuul.routes.person-client=/person-client/**
+</code></pre>
+<ul>
+<li>zuul-prod.properties</li>
+</ul>
+<pre><code>## 应用spring-cloud-zuul默认配置项(prod)
+##zuul.routes.${app-name}=/${prefix}/**
+## Zuul配置person-service服务调用
+zuul.routes.person-service=/person-service/**
+zuul.routes.person-client=/person-client/**
+</code></pre>
+<h4 id="初始化userdirsrcmainresourcesconfigs为git目录">初始化${user.dir}/src/main/resources/configs为git目录</h4>
+<ul>
+<li><code>git init</code></li>
+<li><code>git add *.properties</code></li>
+<li><code>git commit -m 'properties commit'</code></li>
+</ul>
+<h4 id="注册到eureka服务器">注册到Eureka服务器</h4>
+<h5 id="增加eureka客户端依赖">增加Eureka客户端依赖</h5>
+<h5 id="修改配置项">修改配置项</h5>
+<pre><code>eureka.client.service-url.defaultZone=http://localhost:12345/eureka
+</code></pre>
+<p>测试配置</p>
+<pre><code>http://localhost:10000/zuul/default
+http://localhost:10000/zuul/test
+http://localhost:10000/zuul/prod
+</code></pre>
+<h3 id="配置网关服务spring-cloud-zuul">配置网关服务：spring-cloud-zuul</h3>
+<h4 id="增加依赖">增加依赖</h4>
+<pre><code>        &lt;dependency&gt;
+            &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+            &lt;artifactId&gt;spring-cloud-starter-config&lt;/artifactId&gt;
+        &lt;/dependency&gt;
+</code></pre>
+<h4 id="创建bootstrapproperties">创建bootstrap.properties</h4>
+<h4 id="配置">配置</h4>
+
+            </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://k-21d.github.io/tag/1XPYrRrJC/" class="tag">
+                    微服务
+                  </a>
+                
+              </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://k-21d.github.io/post/spring-cloud-feign/">
+                  <h3 class="post-title">
+                    Spring Cloud Feign
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+
+<script type="application/javascript">
+
+AOS.init();
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>

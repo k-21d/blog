@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>Spring WebFlux | 学习博客</title>
+<meta name="description" content="Java Blog">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://k-21d.github.io/favicon.ico?v=1586108481108">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://k-21d.github.io/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://k-21d.github.io">
+        <img src="https://k-21d.github.io/images/avatar.png?v=1586108481108" class="site-logo">
+        <h1 class="site-title">学习博客</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="https://k-21d.github.io" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      Java Blog
+    </div>
+    <div class="site-footer">
+      Powered by k21d | <a class="rss" href="https://k-21d.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">Spring WebFlux</h2>
+            <div class="post-date">2018-12-15</div>
+            
+            <div class="post-content">
+              <h2 id="spring-web-mvc">Spring Web MVC</h2>
+<table>
+<thead>
+<tr>
+<th>Bean type</th>
+<th>Explanation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://docs.spring.io/spring/docs/5.0.8.RELEASE/spring-framework-reference/web.html#mvc-handlermapping">HandlerMapping</a></td>
+<td>Map a request to a handler along with a list of <a href="https://docs.spring.io/spring/docs/5.0.8.RELEASE/spring-framework-reference/web.html#mvc-handlermapping-interceptor">interceptors</a> for pre- and post-processing. The mapping is based on some criteria the details of which vary by <code>HandlerMapping</code> implementation.The two main <code>HandlerMapping</code> implementations are <code>RequestMappingHandlerMapping</code> which supports <code>@RequestMapping</code>annotated methods and <code>SimpleUrlHandlerMapping</code> which maintains explicit registrations of URI path patterns to handlers.</td>
+</tr>
+<tr>
+<td>HandlerAdapter</td>
+<td>Help the <code>DispatcherServlet</code> to invoke a handler mapped to a request regardless of how the handler is actually invoked. For example, invoking an annotated controller requires resolving annotations. The main purpose of a <code>HandlerAdapter</code> is to shield the <code>DispatcherServlet</code> from such details.</td>
+</tr>
+<tr>
+<td><a href="https://docs.spring.io/spring/docs/5.0.8.RELEASE/spring-framework-reference/web.html#mvc-exceptionhandlers">HandlerExceptionResolver</a></td>
+<td>Strategy to resolve exceptions possibly mapping them to handlers, or to HTML error views, or other. See <a href="https://docs.spring.io/spring/docs/5.0.8.RELEASE/spring-framework-reference/web.html#mvc-exceptionhandlers">Exceptions</a>.</td>
+</tr>
+<tr>
+<td><a href="https://docs.spring.io/spring/docs/5.0.8.RELEASE/spring-framework-reference/web.html#mvc-viewresolver">ViewResolver</a></td>
+<td>Resolve logical String-based view names returned from a handler to an actual <code>View</code> to render to the response with. See <a href="https://docs.spring.io/spring/docs/5.0.8.RELEASE/spring-framework-reference/web.html#mvc-viewresolver">View Resolution</a>and <a href="https://docs.spring.io/spring/docs/5.0.8.RELEASE/spring-framework-reference/web.html#mvc-view">View Technologies</a>.</td>
+</tr>
+<tr>
+<td><a href="https://docs.spring.io/spring/docs/5.0.8.RELEASE/spring-framework-reference/web.html#mvc-localeresolver">LocaleResolver</a>, <a href="https://docs.spring.io/spring/docs/5.0.8.RELEASE/spring-framework-reference/web.html#mvc-timezone">LocaleContextResolver</a></td>
+<td>Resolve the <code>Locale</code> a client is using and possibly their time zone, in order to be able to offer internationalized views. See <a href="https://docs.spring.io/spring/docs/5.0.8.RELEASE/spring-framework-reference/web.html#mvc-localeresolver">Locale</a>.</td>
+</tr>
+<tr>
+<td><a href="https://docs.spring.io/spring/docs/5.0.8.RELEASE/spring-framework-reference/web.html#mvc-themeresolver">ThemeResolver</a></td>
+<td>Resolve themes your web application can use, for example, to offer personalized layouts. See <a href="https://docs.spring.io/spring/docs/5.0.8.RELEASE/spring-framework-reference/web.html#mvc-themeresolver">Themes</a>.</td>
+</tr>
+<tr>
+<td><a href="https://docs.spring.io/spring/docs/5.0.8.RELEASE/spring-framework-reference/web.html#mvc-multipart">MultipartResolver</a></td>
+<td>Abstraction for parsing a multi-part request (e.g. browser form file upload) with the help of some multipart parsing library. See <a href="https://docs.spring.io/spring/docs/5.0.8.RELEASE/spring-framework-reference/web.html#mvc-multipart">Multipart resolver</a>.</td>
+</tr>
+<tr>
+<td><a href="https://docs.spring.io/spring/docs/5.0.8.RELEASE/spring-framework-reference/web.html#mvc-flash-attributes">FlashMapManager</a></td>
+<td>Store and retrieve the &quot;input&quot; and the &quot;output&quot; <code>FlashMap</code> that can be used to pass attributes from one request to another, usually across a redirect. See <a href="https://docs.spring.io/spring/docs/5.0.8.RELEASE/spring-framework-reference/web.html#mvc-flash-attributes">Flash attributes</a>.</td>
+</tr>
+</tbody>
+</table>
+<p><code>HandlerInterceptor</code> : 前置、后置处理、完成阶段（异常处理）</p>
+<ul>
+<li>前置：pre- before-</li>
+<li>后置：post- after-</li>
+<li>完成：<code>finally</code>
+<ul>
+<li><code>org.springframework.web.servlet.HandlerInterceptor#afterCompletion</code></li>
+<li><code>java.util.concurrent.CompletableFuture#whenComplete</code></li>
+</ul>
+</li>
+</ul>
+<p><code>HandlerMapping</code> :</p>
+<ul>
+<li>实现
+<ul>
+<li><code>AbstractHandlerMapping</code> (必看)
+<ul>
+<li><code>AbstractHandlerMethodMapping</code> 获取 <code>HandlerMethod</code>
+<ul>
+<li><code>RequestMappingInfoHandlerMapping</code>
+<ul>
+<li><code>RequestMappingHandlerMapping</code> 返回 <code>HandlerMethod</code>
+<ul>
+<li>前提：当 <code>@Controller</code> 方法上面标注了 <code>@RequestMapping</code>
+<ul>
+<li><code>HandlerMethod</code> -&gt; 执行方法？</li>
+<li>通过请求定位 <code>@RequestMapping</code> -&gt; URI</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><code>AbstractUrlHandlerMapping</code> 获取 Handler（注意返回类型）
+<ul>
+<li><code>SimpleUrlHandlerMapping</code> 返回 <code>Object</code></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><code>RequestMappingHandlerMapping</code>
+<ul>
+<li><code>@RequestMapping</code></li>
+</ul>
+</li>
+<li><code>SimpleUrlHandlerMapping</code></li>
+</ul>
+</li>
+<li>包含 <code>HandlerInterceptor</code> 集合
+<ul>
+<li>责任链
+<ul>
+<li>区别 <code>Filter</code>
+<ul>
+<li><code>HandlerInterceptor</code> 采用返回值</li>
+<li><code>Filter</code>  采用 <code>FilterChain</code>
+<ul>
+<li>最终节点 Servlet</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>拦截链条</li>
+<li>各司其职
+<ul>
+<li>顺序</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>作为 <code>DispatcherServlet</code> 一种<code>HandlerMapping</code>
+<ul>
+<li><code>DispatcherServlet</code> 关联多个 <code>HandlerMapping</code>
+<ul>
+<li><code>DispatcherServlet</code> ：  <code>HandlerMapping</code> = 1 : N</li>
+<li><code>HandlerMapping</code> ：  <code>HandlerInterceptor</code> = 1 : N
+<ul>
+<li>要经过筛选 <code>HandlerExecutionChain</code>
+<ul>
+<li>一个 Handler
+<ul>
+<li>猜测一：<code>@Controller</code></li>
+<li>猜测二：<code>@Exceptionhandler</code></li>
+<li><s>猜测三：<code>HttpServletRequest</code></s></li>
+<li><code>HandlerMethod</code> ？</li>
+</ul>
+</li>
+<li><code>HandlerInterceptor</code> List</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>问题：多个 <code>HandlerMapping</code> 谁被选择
+<ul>
+<li>可能猜想点
+<ul>
+<li><code>Ordered</code> 接口参考顺序</li>
+<li>哪个 <code>HandlerMapping</code> 被请求规则匹配了</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<pre><code class="language-java">String lookupPath = this.urlPathHelper.getLookupPathForRequest(request);
+</code></pre>
+<p>HTTP R -&gt; http://www.acme.com/abc/def</p>
+<p>URI -&gt; /abc/def</p>
+<h3 id="handlermethod-初始化过程"><code>HandlerMethod</code> 初始化过程</h3>
+<ul>
+<li>Spring 应用上下文获取所有的 Bean
+<ul>
+<li>筛选出标注 <code>@Controller</code> 或者 <code>@RequestMapping</code> 的 Bean
+<ul>
+<li>再次筛选标准 <code>@RequestMapping</code> 方法
+<ul>
+<li>将该 Bean 和对应 <code>Method</code> 合并成 <code>HandlerMethod</code>
+<ul>
+<li>存入<code>HandlerMethod</code> 集合</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="handlermethod-定位过程"><code>HandlerMethod</code> 定位过程</h3>
+<ul>
+<li><code>HandlerMethod</code> 集合查找 <code>@RequestMapping</code> 定义 URI
+<ul>
+<li>返回 <code>HandlerMethod</code></li>
+</ul>
+</li>
+</ul>
+<h3 id="handlermapping-和-handleradapter-区别"><code>HandlerMapping</code> 和 <code>HandlerAdapter</code> 区别</h3>
+<p><code>HandlerMapping</code> 主要负责映射，一次 HTTP 请求找到对应（最佳）的 <code>HandlerMethod</code> 以及多个 <code>HandlerInterceptor</code> -&gt; <code>HandlerExecutionChain</code></p>
+<pre><code class="language-java">	@Nullable
+	protected HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception {
+		if (this.handlerMappings != null) {
+			for (HandlerMapping hm : this.handlerMappings) {
+				if (logger.isTraceEnabled()) {
+					logger.trace(
+							&quot;Testing handler map [&quot; + hm + &quot;] in DispatcherServlet with name '&quot; + getServletName() + &quot;'&quot;);
+				}
+				HandlerExecutionChain handler = hm.getHandler(request);
+				if (handler != null) {
+					return handler;
+				}
+			}
+		}
+		return null;
+	}
+</code></pre>
+<p><code>HandlerAdapter</code> 主要负责  Handler 执行后处理</p>
+<p>Spring MVC 2.5 之前面向接口编程</p>
+<ul>
+<li>
+<p>页面渲染</p>
+<ul>
+<li>HTML
+<ul>
+<li><code>JstlView</code></li>
+</ul>
+</li>
+<li>JSON
+<ul>
+<li><code>MappingJackson2JsonView</code></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>接口定义</p>
+<pre><code class="language-java">public interface Controller {
+
+	ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception;
+
+}
+</code></pre>
+<p>方法返回值 <code>ModelAndView</code></p>
+<p>方法参数 <code>HttpServletRequest</code> 和 <code>HttpServletResponse</code></p>
+</li>
+<li>
+<p><code>HandlerMapping</code> 老实现：</p>
+</li>
+</ul>
+<p>Spring Web MVC 2.5+ 面向注解驱动编程</p>
+<ul>
+<li><code>HandlerMethod</code>返回值：
+<ul>
+<li><code>ModelAndView</code></li>
+<li><code>String</code></li>
+<li><code>ResponseEntity</code></li>
+<li><code>void</code></li>
+</ul>
+</li>
+<li><code>HandlerMethod</code>参数：
+<ul>
+<li><code>@RequestParam</code></li>
+<li><code>@RequestHeader</code></li>
+<li><code>@PathVariable</code></li>
+<li><code>@RequestBody</code></li>
+<li><code>Model</code></li>
+</ul>
+</li>
+<li><code>HandlerMapping</code> 新实现：<code>RequestMappingHandlerMapping</code></li>
+</ul>
+<p><code>View</code> 页面渲染</p>
+<p><code>JstlView</code></p>
+<p><code>@Controller</code> 处理方法可能不返回 <code>ModelAndView</code></p>
+<p><code>HandlerMethod</code> -&gt;  <code>ModelAndView</code></p>
+<p><code>HandlerInterceptor</code> : 没有匹配请求</p>
+<p><code>MappedInterceptor</code> : 能够匹配请求</p>
+<p><code>@ExceptionHandler</code> :</p>
+<p>Mapped &quot;{[/error]}&quot; onto public org.springframework.http.ResponseEntity&lt;java.util.Map&lt;java.lang.String, java.lang.Object&gt;&gt; org.springframework.boot.autoconfigure.web.servlet.error.BasicErrorController.error(javax.servlet.http.HttpServletRequest)</p>
+<h2 id="理解-webflux-实现">理解 WebFlux 实现</h2>
+<h3 id="orgspringframeworkwebreactivehandlermapping"><code>org.springframework.web.reactive.HandlerMapping</code></h3>
+<p>对比参考 <code>org.springframework.web.servlet.HandlerMapping</code></p>
+<h3 id="orgspringframeworkwebreactivehandleradapter"><code>org.springframework.web.reactive.HandlerAdapter</code></h3>
+<p>对比参考 <code>org.springframework.web.servlet.HandlerAdapter</code></p>
+<h3 id="orgspringframeworkwebreactivedispatcherhandler"><code>org.springframework.web.reactive.DispatcherHandler</code></h3>
+<p>对比参考 <code>org.springframework.web.servlet.DispatcherServlet</code></p>
+<h3 id="java-微服务实现方案">Java 微服务实现方案</h3>
+<h4 id="vertx">Vert.x</h4>
+<h4 id="spring-boot-spring-cloud">Spring Boot / Spring Cloud</h4>
+<h4 id="kuzz">Kuzz</h4>
+
+            </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://k-21d.github.io/post/spring-cloud-netflix-ribbon/">
+                  <h3 class="post-title">
+                    Spring Cloud Netflix Ribbon
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+
+<script type="application/javascript">
+
+AOS.init();
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>

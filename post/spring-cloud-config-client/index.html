@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>Spring Cloud Config Client | 学习博客</title>
+<meta name="description" content="Java Blog">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://k-21d.github.io/favicon.ico?v=1586108481108">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://k-21d.github.io/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://k-21d.github.io">
+        <img src="https://k-21d.github.io/images/avatar.png?v=1586108481108" class="site-logo">
+        <h1 class="site-title">学习博客</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="https://k-21d.github.io" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      Java Blog
+    </div>
+    <div class="site-footer">
+      Powered by k21d | <a class="rss" href="https://k-21d.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">Spring Cloud Config Client</h2>
+            <div class="post-date">2018-10-04</div>
+            
+            <div class="post-content">
+              <h3 id="发布订阅模式">发布/订阅模式</h3>
+<p><code>java.util.Observable</code> 是一个发布者</p>
+<p><code>java.util.Observer</code> 是订阅者</p>
+<p>发布者和订阅者：1 : N</p>
+<p>发布者和订阅者：N : M</p>
+<h3 id="事件监听模式">事件/监听模式</h3>
+<p><code>java.util.EventObject</code> ：事件对象</p>
+<p>​	* 事件对象总是关联着事件源（source）</p>
+<p><code>java.util.EventListener</code> ：事件监听接口（标记）</p>
+<h2 id="spring-事件监听">Spring 事件/监听</h2>
+<p><code>ApplicationEvent</code> : 应用事件</p>
+<p><code>ApplicationListener</code> : 应用监听器</p>
+<h3 id="spring-boot-事件监听器">Spring Boot 事件/监听器</h3>
+<h4 id="configfileapplicationlistener">ConfigFileApplicationListener</h4>
+<p>管理配置文件，比如：<code>application.properties</code> 以及 <code>application.yaml</code></p>
+<p><code>application-{profile}.properties</code>:</p>
+<p>profile  = dev 、test</p>
+<ol>
+<li><code>application-{profile}.properties</code></li>
+<li>application.properties</li>
+</ol>
+<p>Spring Boot 在相对于 ClassPath ： /META-INF/spring.factories</p>
+<p>Java SPI : <code>java.util.ServiceLoader</code></p>
+<p>Spring SPI：</p>
+<p>Spring Boot &quot;/META-INF/spring.factories&quot;</p>
+<pre><code class="language-properties">org.springframework.context.ApplicationListener=\
+org.springframework.boot.ClearCachesApplicationListener,\
+org.springframework.boot.builder.ParentContextCloserApplicationListener,\
+org.springframework.boot.context.FileEncodingApplicationListener,\
+org.springframework.boot.context.config.AnsiOutputApplicationListener,\
+org.springframework.boot.context.config.ConfigFileApplicationListener,\
+org.springframework.boot.context.config.DelegatingApplicationListener,\
+org.springframework.boot.liquibase.LiquibaseServiceLocatorApplicationListener,\
+org.springframework.boot.logging.ClasspathLoggingApplicationListener,\
+org.springframework.boot.logging.LoggingApplicationListener
+</code></pre>
+<h5 id="如何控制顺序">如何控制顺序</h5>
+<p>实现<code>Ordered</code> 以及 标记<code>@Order</code></p>
+<p>在 Spring 里面，数值越小，越优先</p>
+<h3 id="spring-cloud-事件监听器">Spring Cloud 事件/监听器</h3>
+<h4 id="bootstrapapplicationlistener">BootstrapApplicationListener</h4>
+<p>Spring Cloud &quot;/META-INF/spring.factories&quot;:</p>
+<pre><code class="language-properties"># Application Listeners
+org.springframework.context.ApplicationListener=\
+org.springframework.cloud.bootstrap.BootstrapApplicationListener,\
+org.springframework.cloud.bootstrap.LoggingSystemShutdownListener,\
+org.springframework.cloud.context.restart.RestartListener
+</code></pre>
+<blockquote>
+<p>加载的优先级 高于 <code>ConfigFileApplicationListener</code>，所以 application.properties 文件即使定义也配置不到！</p>
+<p>原因在于：</p>
+<p><code>BootstrapApplicationListener</code> 第6优先</p>
+<p><code>ConfigFileApplicationListener</code> 第11优先</p>
+</blockquote>
+<ol>
+<li>负责加载<code>bootstrap.properties</code> 或者 <code>bootstrap.yaml</code></li>
+<li>负责初始化 Bootstrap ApplicationContext ID = &quot;bootstrap&quot;</li>
+</ol>
+<pre><code class="language-java">ConfigurableApplicationContext context = builder.run();
+</code></pre>
+<p>Bootstrap 是一个根 Spring 上下文，parent = null</p>
+<blockquote>
+<p>联想 ClassLoader：</p>
+<p>ExtClassLoader &lt;- AppClassLoader &lt;- System ClassLoader -&gt; Bootstrap Classloader(null)</p>
+</blockquote>
+<h4 id="configurableapplicationcontext">ConfigurableApplicationContext</h4>
+<p>标准实现类：<code>AnnotationConfigApplicationContext</code></p>
+<h3 id="env-端点environmentendpoint">Env 端点：<code>EnvironmentEndpoint</code></h3>
+<p><code>Environment</code> 关联多个带名称的<code>PropertySource</code></p>
+<p>可以参考一下Spring Framework 源码：</p>
+<p><code>AbstractRefreshableWebApplicationContext</code></p>
+<pre><code class="language-java">protected void initPropertySources() {
+  ConfigurableEnvironment env = getEnvironment();
+  if (env instanceof ConfigurableWebEnvironment) {
+    ((ConfigurableWebEnvironment) env).initPropertySources(this.servletContext, this.servletConfig);
+  }
+}
+</code></pre>
+<p><code>Environment</code> 有两种实现方式：</p>
+<p>普通类型：<code>StandardEnvironment</code></p>
+<p>Web类型：<code>StandardServletEnvironment</code></p>
+<p><code>Environment</code></p>
+<ul>
+<li>
+<p><code>AbstractEnvironment</code></p>
+<p>​	- <code>StandardEnvironment</code></p>
+</li>
+</ul>
+<p>Enviroment 关联着一个<code>PropertySources</code> 实例</p>
+<p><code>PropertySources</code> 关联着多个<code>PropertySource</code>，并且有优先级</p>
+<p>其中比较常用的<code>PropertySource</code> 实现：</p>
+<p>Java System#getProperties 实现：  名称&quot;systemProperties&quot;，对应的内容 <code>System.getProperties()</code></p>
+<p>Java System#getenv 实现(环境变量）：  名称&quot;systemEnvironment&quot;，对应的内容 <code>System.getProperties()</code></p>
+<p>关于 Spring Boot 优先级顺序，可以参考：https://docs.spring.io/spring-boot/docs/2.0.0.BUILD-SNAPSHOT/reference/htmlsingle/#boot-features-external-config</p>
+
+            </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://k-21d.github.io/tag/1XPYrRrJC/" class="tag">
+                    微服务
+                  </a>
+                
+              </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://k-21d.github.io/post/ubuntu1804-an-zhuang-jdk8/">
+                  <h3 class="post-title">
+                    Ubuntu18.04安装JDK8
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+
+<script type="application/javascript">
+
+AOS.init();
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>
