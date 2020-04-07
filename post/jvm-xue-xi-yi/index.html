@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>JVM学习(一) | 学习博客</title>
+<meta name="description" content="Java Blog">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://k-21d.github.io/favicon.ico?v=1586276561779">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://k-21d.github.io/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://k-21d.github.io">
+        <img src="https://k-21d.github.io/images/avatar.png?v=1586276561779" class="site-logo">
+        <h1 class="site-title">学习博客</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="https://k-21d.github.io" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      Java Blog
+    </div>
+    <div class="site-footer">
+      Powered by k21d | <a class="rss" href="https://k-21d.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">JVM学习(一)</h2>
+            <div class="post-date">2019-03-08</div>
+            
+            <div class="post-content">
+              <h2 id="description-of-java-conceptual-diagram"><a href="https://docs.oracle.com/javase/8/docs/technotes/guides/desc_jdk_structure.html">Description of Java Conceptual Diagram</a></h2>
+<figure data-type="image" tabindex="1"><img src="https://cdn.nlark.com/yuque/0/2020/png/713413/1586276237017-68820129-1062-495a-975f-a70a8461ecae.png" alt="1586239432416" loading="lazy"></figure>
+<h2 id="源码到类文件">源码到类文件</h2>
+<h3 id="源码">源码</h3>
+<p>Person.java</p>
+<pre><code>class Person{
+    private String name;
+    private int age;
+    private static String address;
+    private final static String hobby=&quot;Programming&quot;;
+    public void say(){
+        System.out.println(&quot;person say...&quot;);
+    } 
+    public int calc(int op1,int op2){
+      return op1+op2;
+    }
+}
+</code></pre>
+<blockquote>
+<p>编译: javac Person.java ---&gt; Person.class</p>
+</blockquote>
+<h3 id="编译过程">编译过程</h3>
+<blockquote>
+<p>Person.java -&gt; 词法分析器 -&gt; tokens流 -&gt; 语法分析器 -&gt; 语法树/抽象语法树 -&gt; 语义分析器<br>
+-&gt; 注解抽象语法树 -&gt; 字节码生成器 -&gt; Person.class文件</p>
+</blockquote>
+<h3 id="类文件">类文件</h3>
+<p>将Person.class以16进制查看</p>
+<pre><code>cafe babe 0000 0034 0027 0a00 0600 1809
+0019 001a 0800 1b0a 001c 001d 0700 1e07
+001f 0100 046e 616d 6501 0012 4c6a 6176
+612f 6c61 6e67 2f53 7472 696e 673b 0100
+0361 6765 0100 0149 0100 0761 6464 7265
+7373 0100 0568 6f62 6279 0100 0d43 6f6e
+7374 616e 7456 616c 7565 0800 2001 0006
+3c69 6e69 743e 0100 0328 2956 0100 0443
+6f64 6501 000f 4c69 6e65 4e75 6d62 6572
+5461 626c 6501 0003 7361 7901 0004 6361
+6c63 0100 0528 4949 2949 0100 0a53 6f75
+7263 6546 696c 6501 000b 5065 7273 6f6e
+2e6a 6176 610c 000f 0010 0700 210c 0022
+0023 0100 0d70 6572 736f 6e20 7361 792e
+2e2e 0700 240c 0025 0026 0100 0650 6572
+736f 6e01 0010 6a61 7661 2f6c 616e 672f
+4f62 6a65 6374 0100 0b50 726f 6772 616d
+6d69 6e67 0100 106a 6176 612f 6c61 6e67
+2f53 7973 7465 6d01 0003 6f75 7401 0015
+4c6a 6176 612f 696f 2f50 7269 6e74 5374
+7265 616d 3b01 0013 6a61 7661 2f69 6f2f
+5072 696e 7453 7472 6561 6d01 0007 7072
+696e 746c 6e01 0015 284c 6a61 7661 2f6c
+616e 672f 5374 7269 6e67 3b29 5600 2000
+0500 0600 0000 0400 0200 0700 0800 0000
+0200 0900 0a00 0000 0a00 0b00 0800 0000
+1a00 0c00 0800 0100 0d00 0000 0200 0e00
+0300 0000 0f00 1000 0100 1100 0000 1d00
+0100 0100 0000 052a b700 01b1 0000 0001
+0012 0000 0006 0001 0000 0001 0001 0013
+0010 0001 0011 0000 0025 0002 0001 0000
+0009 b200 0212 03b6 0004 b100 0000 0100
+1200 0000 0a00 0200 0000 0700 0800 0800
+0100 1400 1500 0100 1100 0000 1c00 0200
+0300 0000 041b 1c60 ac00 0000 0100 1200
+0000 0600 0100 0000 0a00 0100 1600 0000
+0200 17
+</code></pre>
+<ul>
+<li>magic</li>
+</ul>
+<blockquote>
+<p>The magic item supplies the magic number identifying the class file format; it has the<br>
+value 0xCAFEBABE .</p>
+</blockquote>
+<ul>
+<li>minor_version, major_version</li>
+</ul>
+<blockquote>
+<p>0000 0034 对应10进制的52，代表JDK 8中的一个版本</p>
+</blockquote>
+<ul>
+<li>constant_pool_count</li>
+</ul>
+<blockquote>
+<p>0027 对应十进制27，代表常量池中27个常量</p>
+</blockquote>
+<pre><code>//A class file consists of a single ClassFile structure:
+ClassFile {
+    u4 magic;
+    u2 minor_version;
+    u2 major_version; 
+    u2 constant_pool_count;
+    cp_info constant_pool[constant_pool_count-1];//常量池中常量
+    u2 access_flags;//访问标志
+    u2 this_class;//类索引
+    u2 super_class;//父类索引
+    u2 interfaces_count;//接口索引
+    u2 interfaces[interfaces_count];
+    u2 fields_count;
+    field_info fields[fields_count]; //字段表集合
+    u2 methods_count;
+    method_info methods[methods_count];//方法表集合
+    u2 attributes_count;
+    attribute_info attributes[attributes_count];//属性表集合
+}
+</code></pre>
+<h2 id="类加载机制">类加载机制</h2>
+<h3 id="装载load">装载(Load)</h3>
+<p>查找和导入class文件</p>
+<ol>
+<li>通过一个类的全限定名获取定义此类的二进制字节流</li>
+<li>将这个字节流所代表的静态存储结构转化为方法区的运行时数据结构</li>
+<li>在Java堆中生成一个代表这个类的java.lang.Class对象，作为对方法区中这些数据的访问入口</li>
+</ol>
+<h3 id="链接link">链接(Link)</h3>
+<h4 id="验证verify">验证(Verify)</h4>
+<p>保证被加载类的正确性</p>
+<ul>
+<li>文件格式验证</li>
+<li>元数据验证</li>
+<li>字节码验证</li>
+<li>符号引用验证</li>
+</ul>
+<h4 id="准备prepare">准备(Prepare)</h4>
+<p>为类的静态变量分配内存，并将其初始化为默认值</p>
+<h4 id="解析resolve">解析(Resolve)</h4>
+<p>把类中的符号引用转换为直接引用</p>
+<h3 id="初始化initialize">初始化(Initialize)</h3>
+<p>对类的静态变量，静态代码块执行初始化操作</p>
+<h2 id="类装载器classloader">类装载器ClassLoader</h2>
+<p>在装载(Load)阶段，其中第(1)步:通过类的全限定名获取其定义的二进制字节流，需要借助类装载<br>
+器完成，顾名思义，就是用来装载Class文件的。</p>
+<h3 id="分类">分类</h3>
+<table>
+<thead>
+<tr>
+<th>Bootstrap ClassLoader</th>
+<th>负责加载$JAVA_HOME中 jre/lib/rt.jar 里所有的class或Xbootclassoath选项指定的jar包。由C++实现，不是ClassLoader子类。</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Extension ClassLoader</td>
+<td>负责加载java平台中扩展功能的一些jar包，包括$JAVA_HOME中jre/lib/*.jar 或 -Djava.ext.dirs指定目录下的jar包</td>
+</tr>
+<tr>
+<td>App ClassLoader</td>
+<td>负责加载classpath中指定的jar包及 Djava.class.path 所指定目录下的类和jar包</td>
+</tr>
+<tr>
+<td>Custom ClassLoader</td>
+<td>通过java.lang.ClassLoader的子类自定义加载class，属于应用程序根据自身需要自定义的ClassLoader，如tomcat、jboss都会根据j2ee规范自行实现ClassLoader</td>
+</tr>
+</tbody>
+</table>
+<h3 id="加载原则">加载原则</h3>
+<p>检查某个类是否已经加载：顺序是自底向上，从Custom ClassLoader到BootStrap ClassLoader逐层检<br>
+查，只要某个Classloader已加载，就视为已加载此类，保证此类只所有ClassLoader加载一次。</p>
+<p>加载的顺序：加载的顺序是自顶向下，也就是由上层来逐层尝试加载此类。</p>
+<h4 id="双亲委派机制">双亲委派机制</h4>
+<ul>
+<li>
+<p>定义</p>
+<blockquote>
+<p>如果一个类加载器在接到加载类的请求时，它首先不会自己尝试去加载这个类，而是把<br>
+这个请求任务委托给父类加载器去完成，依次递归，如果父类加载器可以完成类加载任务，就<br>
+成功返回；只有父类加载器无法完成此加载任务时，才自己去加载。</p>
+</blockquote>
+</li>
+<li>
+<p>优势</p>
+<blockquote>
+<p>Java类随着加载它的类加载器一起具备了一种带有优先级的层次关系。比如，Java中的<br>
+Object类，它存放在rt.jar之中,无论哪一个类加载器要加载这个类，最终都是委派给处于模型<br>
+最顶端的启动类加载器进行加载，因此Object在各种类加载环境中都是同一个类。如果不采用<br>
+双亲委派模型，那么由各个类加载器自己取加载的话，那么系统中会存在多种不同的Object<br>
+类。</p>
+</blockquote>
+</li>
+<li>
+<p>破坏</p>
+<blockquote>
+<p>可以继承ClassLoader类，然后重写其中的loadClass方法</p>
+</blockquote>
+</li>
+</ul>
+<h2 id="运行时数据区run-time-data-areas">运行时数据区(Run-Time Data Areas)</h2>
+<h3 id="method-area方法区">Method Area(方法区)</h3>
+<p>方法区是各个线程共享的内存区域，在虚拟机启动时创建。</p>
+<p>用于存储已被虚拟机加载的类信息、常量、静态变量、即时编译器编译后的代码等数据。</p>
+<p>虽然Java虚拟机规范把方法区描述为堆的一个逻辑部分，但是它却又一个别名叫做Non-Heap(非堆)，目<br>
+的是与Java堆区分开来。</p>
+<p>当方法区无法满足内存分配需求时，将抛出OutOfMemoryError异常。</p>
+<blockquote>
+<p>The Java Virtual Machine has a method area that is shared among all Java Virtual Machine threads.<br>
+The method area is created on virtual machine start-up. Although the method area is logically part of the heap,......<br>
+If memory in the method area cannot be made available to satisfy an allocation request, the Java Virtual Machine throws an OutOfMemoryError.</p>
+</blockquote>
+<ul>
+<li>方法区在JDK 8中就是Metaspace，在JDK6或7中就是Perm Space</li>
+<li>Run-Time Constant Pool</li>
+</ul>
+<p>Class文件中除了有类的版本、字段、方法、接口等描述信息外，还有一项信息就是常量池，用于存放编译时期生成的各种字面量和符号引用，这部分内容将在类加载后进入方法区的运行时常量池中存放。</p>
+<h3 id="heap堆">Heap(堆)</h3>
+<p>Java堆是Java虚拟机所管理内存中最大的一块，在虚拟机启动时创建，被所有线程共享。<br>
+Java对象实例以及数组都在堆上分配。</p>
+<blockquote>
+<p>The Java Virtual Machine has a heap that is shared among all Java Virtual Machine threads. The heap is the run-time data area from which memory for all class instances and arrays is allocated. The heap is created on virtual machine start-up.</p>
+</blockquote>
+<h3 id="java-virtual-machine-stacks虚拟机栈">Java Virtual Machine Stacks(虚拟机栈)</h3>
+<p>虚拟机栈是一个线程执行的区域，保存着一个线程中方法的调用状态。换句话说，一个Java线程的运行状态，由一个虚拟机栈来保存，所以虚拟机栈肯定是线程私有的，独有的，随着线程的创建而创建。</p>
+<p>每一个被线程执行的方法，为该栈中的栈帧，即每个方法对应一个栈帧。</p>
+<p>调用一个方法，就会向栈中压入一个栈帧；一个方法调用完成，就会把该栈帧从栈中弹出。</p>
+<blockquote>
+<p>Each Java Virtual Machine thread has a private Java Virtual Machine stack,<br>
+created at the same time as the thread. A Java Virtual Machine stack stores<br>
+frames (§2.6).</p>
+</blockquote>
+<p>Person类的字节码文件反编译结果：</p>
+<pre><code>Compiled from &quot;Person.java&quot;
+class Person {
+  Person();
+    Code:
+       0: aload_0
+       1: invokespecial #1                  // Method java/lang/Object.&quot;&lt;init&gt;&quot;:()V
+       4: return
+
+  public void say();
+    Code:
+       0: getstatic     #2                  // Field java/lang/System.out:Ljava/io/PrintStream;
+       3: ldc           #3                  // String person say...
+       5: invokevirtual #4                  // Method java/io/PrintStream.println:(Ljava/lang/String;)V
+       8: return
+
+  public int calc(int, int);
+    Code:
+       0: iload_1
+       1: iload_2
+       2: iadd
+       3: ireturn
+}
+
+</code></pre>
+<h3 id="the-pc-register程序计数器">The pc Register(程序计数器)</h3>
+<p>程序计数器占用的内存空间很小，由于Java虚拟机的多线程是通过线程轮流切换，并分配处理器执行时间的方式来实现的，在任意时刻，一个处理器只会执行一条线程中的指令。因此，为了线程切换后能够恢复到正确的执行位置，每条线程需要有一个独立的程序计数器(线程私有)。</p>
+<p>如果线程正在执行Java方法，则计数器记录的是正在执行的虚拟机字节码指令的地址；如果正在执行的是Native方法，则这个计数器为空。</p>
+<blockquote>
+<p>The Java Virtual Machine can support many threads of execution at once (JLS§17). Each Java Virtual Machine thread has its own pc (program counter) register. At any point, each Java Virtual Machine thread is executing the code of a single method, namely the current method (§2.6) for that thread. If that method is not native, the pc register contains the address of the Java Virtual Machine instruction currently being executed. If the method currently being executed by the thread is native, the value of the Java Virtual Machine's pc register is undefined. The Java Virtual Machine's pc register is wide enough to hold a returnAddress or a native pointer on the specific platform.</p>
+</blockquote>
+<h3 id="native-method-stacks本地方法栈">Native Method Stacks(本地方法栈)</h3>
+<p>如果当前线程执行的方法是Native类型的，这些方法就会在本地方法栈中执行。</p>
+
+            </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://k-21d.github.io/post/spring-cloud-gateway/">
+                  <h3 class="post-title">
+                    Spring Cloud Gateway
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+
+<script type="application/javascript">
+
+AOS.init();
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>
