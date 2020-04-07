@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://k-21d.github.io</id>
     <title>学习博客</title>
-    <updated>2020-04-07T16:44:20.648Z</updated>
+    <updated>2020-04-07T16:46:04.904Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://k-21d.github.io"/>
     <link rel="self" href="https://k-21d.github.io/atom.xml"/>
@@ -2231,7 +2231,7 @@ class Person {
 }
 
 </code></pre>
-<h4 id="结合字节码指令理解java虚拟机栈和栈帧">结合字节码指令理解Java虚拟机栈和栈帧</h4>
+<h4 id="栈帧">栈帧</h4>
 <p>栈帧：每个栈帧对应一个被调用的方法，可以理解为一个方法的运行空间。</p>
 <ul>
 <li>
