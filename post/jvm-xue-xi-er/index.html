@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>JVM学习(二) | 学习博客</title>
+<meta name="description" content="Java Blog">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://k-21d.github.io/favicon.ico?v=1586365431652">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://k-21d.github.io/styles/main.css">
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+
+
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://k-21d.github.io">
+        <img src="https://k-21d.github.io/images/avatar.png?v=1586365431652" class="site-logo">
+        <h1 class="site-title">学习博客</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="https://k-21d.github.io" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      Java Blog
+    </div>
+    <div class="site-footer">
+      Powered by k21d | <a class="rss" href="https://k-21d.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">JVM学习(二)</h2>
+            <div class="post-date">2019-03-16</div>
+            
+            <div class="post-content">
+              <h1 id="jvm内存模型">JVM内存模型</h1>
+<figure data-type="image" tabindex="1"><img src="https://cdn.nlark.com/yuque/0/2020/png/713413/1586365121505-33596669-d3c5-4dd0-8843-c195db16124f.png" alt="JVM" loading="lazy"></figure>
+<blockquote>
+<p>JVM内存区域分为非堆区和堆区，堆区分为两大块，一个是一个是Old区，一个是Young区。</p>
+<p>Young区分为两大块，一个是Survivor区（S0+S1），一块是Eden区。 Eden:S0:S1=8:1:1</p>
+<p>S0和S1一样大，也可以叫From和To。</p>
+</blockquote>
+<h2 id="对象创建所在区域">对象创建所在区域</h2>
+<p>一般情况下，新创建的对象都会被分配到Eden区，一些特殊的大的对象会直接分配到Old区。</p>
+<p>比如有对象A，B，C等创建在Eden区，但是Eden区的内存空间肯定有限，比如有100M，假如已经使用了100M或者达到一个设定的临界值，这时候就需要对Eden内存空间进行清理，即垃圾收集(Garbage Collect)，这样的GC我们称之为Minor GC，Minor GC指得是Young区的GC。</p>
+<p>经过GC之后，有些对象就会被清理掉，有些对象可能还存活着，对于存活着的对象需要将其复制到Survivor区，然后再清空Eden区中的这些对象。</p>
+<h2 id="survivor区">Survivor区</h2>
+<p>Survivor区分为两块S0和S1，也可以叫做Survivor From和Survivor To。</p>
+<p>在同一个时间点上，S0和S1只能有一个区有数据，另外一个是空的。</p>
+<p>如果一开始只有Eden区和From中有对象，To中是空的。 此时进行一次GC操作，From区中对象的年龄就会+1，  Eden区中所有存活的对象会被复制到To区，From区中还能存活的对象会有两个去处。</p>
+<ul>
+<li>若对象年龄达到之前设置好的年龄阈值，此时对象会被移动到Old区</li>
+<li>如果Eden区和From区没有达到阈值的对象会被复制到To区</li>
+</ul>
+<p>此时Eden区和From区已经被清空 。这时候From和To交换角色，之前的From变成了To，之前的To变成了From。也就是说无论如何都要保证名为To的Survivor区域是空的。Minor GC会一直重复这样的过程，直到To区被填满，然后会将所有对象复制到老年代中。</p>
+<h2 id="old区">Old区</h2>
+<p>一般Old区都是年龄比较大的对象，或者相对超过了某个阈值的对象。</p>
+<p>在Old区也会有GC的操作，Old区的GC我们称作为Major GC。</p>
+<h2 id="总结">总结</h2>
+<figure data-type="image" tabindex="2"><img src="https://cdn.nlark.com/yuque/0/2020/png/713413/1586365139828-77823d12-dced-40b3-87ed-21ba85fbe8e1.png" alt="JVM_MEMORY" loading="lazy"></figure>
+<h3 id="如何理解minormajorfull-gc">如何理解Minor/Major/Full GC</h3>
+<ul>
+<li>Minor GC:新生代</li>
+<li>Major GC:老年代</li>
+<li>Full GC:新生代+老年代</li>
+</ul>
+<h3 id="为什么需要survivor区只有eden不行吗">为什么需要Survivor区?只有Eden不行吗？</h3>
+<p>如果没有Survivor,Eden区每进行一次Minor GC,并且没有年龄限制的话，存活的对象就会被送到老年代。这样一来，老年代很快被填满,触发Major GC(因为Major GC一般伴随着Minor GC,也可以看做触发了Full GC)。老年代的内存空间远大于新生代,进行一次Full GC消耗的时间比Minor GC长得多。</p>
+<p>假如增加老年代空间，更多存活对象才能填满老年代。虽然降低Full GC频率，但是随着老年代空间加大,一旦发生Full  GC,执行所需要的时间更长。</p>
+<p>假如减少老年代空间，虽然Full GC所需时间减少，但是老年代很快被存活对象填满,Full GC频率增加。</p>
+<p>所以Survivor的存在意义,就是减少被送到老年代的对象,进而减少Full GC的发生,Survivor的预筛选保证,只有经历16 次Minor GC还能在新生代中存活的对象,才会被送到老年代。</p>
+<h3 id="为什么需要两个survivor区">为什么需要两个Survivor区？</h3>
+<p>最大的好处就是解决了碎片化，永远有一个Survivor space是空的,另一个非空的Survivor space无碎片。</p>
+<h3 id="新生代中edens1s2为什么是811">新生代中Eden:S1:S2为什么是8:1:1？</h3>
+<p>新生代中的可用内存：复制算法用来担保的内存为9：1</p>
+<p>可用内存中Eden：S1区为8：1</p>
+<p>即新生代中Eden:S1:S2 = 8：1：1</p>
+<h2 id="使用java-visualvm查看">使用Java VisualVM查看</h2>
+<p>安装Visual GC插件可查看内存区域</p>
+<figure data-type="image" tabindex="3"><img src="https://cdn.nlark.com/yuque/0/2020/png/713413/1586365163981-396f6eef-f866-44b6-b2e3-0a4d64d499fe.png" alt="" loading="lazy"></figure>
+<h3 id="堆内存溢出">堆内存溢出</h3>
+<figure data-type="image" tabindex="4"><img src="https://cdn.nlark.com/yuque/0/2020/gif/713413/1586365180853-b0544d77-9e30-44e3-b1d1-7a65194731e7.gif" alt="GIF 2020-4-8 13-56-33" loading="lazy"></figure>
+<h3 id="方法区内存溢出">方法区内存溢出</h3>
+<pre><code>java.lang.OutOfMemoryError: Metaspace
+	at java.lang.ClassLoader.defineClass1(Native Method) ~[na:1.8.0_211]
+	at java.lang.ClassLoader.defineClass(ClassLoader.java:763) ~[na:1.8.0_211]
+	at java.lang.ClassLoader.defineClass(ClassLoader.java:642) ~[na:1.8.0_211]
+</code></pre>
+<h3 id="虚拟机栈">虚拟机栈</h3>
+<pre><code>public class StackOverFlowDemo {
+
+    public static long count=0;
+
+    public static void method(long i){
+        System.out.println(count++);
+        method(i);
+    }
+
+    public static void main(String[] args) {
+        method(1);
+    }
+}
+</code></pre>
+<p>设置JVM参数<code>-Xss128k</code>运行结果：</p>
+<pre><code>Exception in thread &quot;main&quot; java.lang.StackOverflowError
+	at sun.nio.cs.UTF_8.updatePositions(UTF_8.java:77)
+	at sun.nio.cs.UTF_8.access$200(UTF_8.java:57)
+	at sun.nio.cs.UTF_8$Encoder.encodeArrayLoop(UTF_8.java:636)
+	at sun.nio.cs.UTF_8$Encoder.encodeLoop(UTF_8.java:691)
+	......
+</code></pre>
+<blockquote>
+<p>Stack Space用来做方法的递归调用时压入Stack Frame(栈帧)。所以当递归调用太深的时候，就有可能耗尽Stack Space，爆出StackOverflow的错误。</p>
+<p>-Xss128k：设置每个线程的堆栈大小。JDK 5以后每个线程堆栈大小为1M，以前每个线程堆栈大小为256K。根据应用的线程所需内存大小进行调整。在相同物理内存下，减小这个值能生成更多的线程。</p>
+<p>线程栈的大小如果设置过小，可能会出现栈溢出，特别是在该线程内有递归、大的循环时出现溢出的可能性更大，如果该值设置过大，就有影响到创建栈的数量，如果是多线程的应用，就会出现内存溢出的错误。</p>
+</blockquote>
+<h1 id="garbage-collect垃圾回收">Garbage Collect(垃圾回收)</h1>
+<h2 id="如何确定一个对象是垃圾">如何确定一个对象是垃圾？</h2>
+<p>要想进行垃圾回收，得先知道什么样的对象是垃圾。</p>
+<h3 id="引用计数法">引用计数法</h3>
+<p>对于某个对象而言，只要应用程序中持有该对象的引用，就说明该对象不是垃圾，如果一个对象没有任<br>
+何指针对其引用，它就是垃圾。</p>
+<p><strong>弊端 :</strong> 如果AB相互持有引用，导致永远不能被回收。</p>
+<h3 id="可达性分析">可达性分析</h3>
+<p>通过GC Root的对象，开始向下寻找，看某个对象是否可达</p>
+<blockquote>
+<p>能作为GC Root:类加载器、Thread、虚拟机栈的本地变量表、static成员、常量引用、本地方法<br>
+栈的变量等。</p>
+</blockquote>
+<h2 id="垃圾收集算法">垃圾收集算法</h2>
+<h3 id="标记-清除mark-sweep">标记-清除(Mark-Sweep)</h3>
+<ul>
+<li>
+<p>标记：找出内存中需要回收的对象，并且把它们标记出来</p>
+<blockquote>
+<p>此时堆中所有的对象都会被扫描一遍，从而才能确定需要回收的对象，比较耗时</p>
+</blockquote>
+</li>
+<li>
+<p>清除：清除掉被标记需要回收的对象，释放出对应的内存空间</p>
+</li>
+</ul>
+<p><strong>缺点：</strong></p>
+<ul>
+<li>标记和清除两个过程都比较耗时，效率不高</li>
+<li>会产生大量不连续的内存碎片，空间碎片太多可能会导致以后在程序运行过程中需要分配较大对象时，无<br>
+法找到足够的连续内存而不得不提前触发另一次垃圾收集动作</li>
+</ul>
+<h3 id="复制copying">复制(Copying)</h3>
+<p>将内存划分为两块相等的区域，每次只使用其中一块，当其中一块内存使用完了，就将还存活的对象复制到另外一块上面，然后把已经使用过的内存空间一次清除掉。</p>
+<p><strong>缺点:</strong> 空间利用率降低。</p>
+<h3 id="标记-整理mark-compact">标记-整理(Mark-Compact)</h3>
+<p>标记过程仍然与&quot;标记-清除&quot;算法一样，但是后续步骤不是直接对可回收对象进行清理，而是让所有存活的对象都向一端移动，然后直接清理掉端边界以外的内存。</p>
+<h2 id="分代收集算法">分代收集算法</h2>
+<ul>
+<li>Young区：复制算法(对象在被分配之后，可能生命周期比较短，Young区复制效率比较高)</li>
+<li>Old区：标记清除或标记整理(Old区对象存活时间比较长，复制来复制去没必要，不如做个标记再清理)</li>
+</ul>
+<h2 id="垃圾收集器">垃圾收集器</h2>
+<table>
+<thead>
+<tr>
+<th>收集器</th>
+<th>串行、并行or并发</th>
+<th>新生代/老年代</th>
+<th>算法</th>
+<th>目标</th>
+<th>适用场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Serial</td>
+<td>串行</td>
+<td>新生代</td>
+<td>复制算法</td>
+<td>响应速度优先</td>
+<td>单CPU环境下的Client模式</td>
+</tr>
+<tr>
+<td>Serial Old</td>
+<td>串行</td>
+<td>老年代</td>
+<td>标记-整理</td>
+<td>响应速度优先</td>
+<td>单CPU环境下的Client模式、CMS的后备预案</td>
+</tr>
+<tr>
+<td>ParNew</td>
+<td>并行</td>
+<td>新生代</td>
+<td>复制算法</td>
+<td>响应速度优先</td>
+<td>多CPU环境时在Server模式下与CMS配合</td>
+</tr>
+<tr>
+<td>Parallel Scavenge</td>
+<td>并行</td>
+<td>新生代</td>
+<td>复制算法</td>
+<td>吞吐量优先</td>
+<td>在后台运算而不需要太多交互的任务</td>
+</tr>
+<tr>
+<td>Parallel Old</td>
+<td>并行</td>
+<td>老年代</td>
+<td>标记-整理</td>
+<td>吞吐量优先</td>
+<td>在后台运算而不需要太多交互的任务</td>
+</tr>
+<tr>
+<td>CMS</td>
+<td>并发</td>
+<td>老年代</td>
+<td>标记-清除</td>
+<td>响应速度优先</td>
+<td>集中在互联网站或B/S系统服务端上的Java应用</td>
+</tr>
+<tr>
+<td>G1</td>
+<td>并发</td>
+<td>both</td>
+<td>标记-整理+复制算法</td>
+<td>响应速度优先</td>
+<td>面向服务端应用，替换CMS</td>
+</tr>
+</tbody>
+</table>
+<h3 id="serial收集器">Serial收集器</h3>
+<p>Serial收集器是最基本、发展历史最悠久的收集器，曾经（在JDK1.3.1之前）是虚拟机新生代收集的唯<br>
+一选择。<br>
+它是一种单线程收集器，不仅仅意味着它只会使用一个CPU或者一条收集线程去完成垃圾收集工作，更<br>
+重要的是其在进行垃圾收集的时候需要暂停其他线程。</p>
+<blockquote>
+<p>优点：简单高效，拥有很高的单线程收集效率<br>
+缺点：收集过程需要暂停所有线程<br>
+算法：复制算法<br>
+适用范围：新生代<br>
+应用：Client模式下的默认新生代收集器</p>
+</blockquote>
+<h3 id="parnew收集器">ParNew收集器</h3>
+<p>可以把这个收集器理解为Serial收集器的多线程版本。</p>
+<blockquote>
+<p>优点：在多CPU时，比Serial效率高。<br>
+缺点：收集过程暂停所有应用程序线程，单CPU时比Serial效率差。<br>
+算法：复制算法<br>
+适用范围：新生代<br>
+应用：运行在Server模式下的虚拟机中首选的新生代收集器</p>
+</blockquote>
+<h3 id="parallel-scavenge收集器">Parallel Scavenge收集器</h3>
+<p>Parallel Scavenge收集器是一个新生代收集器，它也是使用复制算法的收集器，又是并行的多线程收集<br>
+器，看上去和ParNew一样，但是Parallel Scanvenge更关注 系统的吞吐量 。</p>
+<blockquote>
+<p>吞吐量=运行用户代码的时间/(运行用户代码的时间+垃圾收集时间)<br>
+比如虚拟机总共运行了100分钟，垃圾收集时间用了1分钟，吞吐量=(100-1)/100=99%。<br>
+若吞吐量越大，意味着垃圾收集的时间越短，则用户代码可以充分利用CPU资源，尽快完成程序<br>
+的运算任务。</p>
+</blockquote>
+<h3 id="serial-old收集器">Serial Old收集器</h3>
+<p>Serial Old收集器是Serial收集器的老年代版本，也是一个单线程收集器，不同的是采用&quot;标记-整理算<br>
+法&quot;，运行过程和Serial收集器一样。</p>
+<h3 id="parallel-old收集器">Parallel Old收集器</h3>
+<p>Parallel Old收集器是Parallel Scavenge收集器的老年代版本，使用多线程和&quot;标记-整理算法&quot;进行垃圾<br>
+回收。</p>
+<h3 id="cms收集器">CMS收集器</h3>
+<p>CMS(Concurrent Mark Sweep)收集器是一种以获取最短回收停顿时间为目标的收集器。</p>
+<p>采用的是&quot;标记-清除算法&quot;,整个过程分为4步</p>
+<ul>
+<li>初始标记 CMS initial mark 	         (标记GC Roots能关联到的对象 Stop The World---&gt;速度很快）</li>
+<li>并发标记 CMS concurrent mark （进行GC Roots Tracing）</li>
+<li>重新标记 CMS remark                  （修改并发标记因用户程序变动的内容 Stop The World）</li>
+<li>并发清除 CMS concurrent sweep</li>
+</ul>
+<p>由于整个过程中，并发标记和并发清除，收集器线程可以与用户线程一起工作，所以总体上来说，CMS收集器的内存回收过程是与用户线程一起并发地执行的。</p>
+<blockquote>
+<p>优点：并发收集、低停顿<br>
+缺点：产生大量空间碎片、并发阶段会降低吞吐量</p>
+</blockquote>
+<h3 id="g1收集器">G1收集器</h3>
+<p>G1特点</p>
+<ul>
+<li>并行与并发</li>
+<li>分代收集（仍然保留了分代的概念）</li>
+<li>空间整合（整体上属于“标记-整理”算法，不会导致空间碎片）</li>
+<li>可预测的停顿（比CMS更先进的地方在于能让使用者明确指定一个长度为M毫秒的时间片段内，消耗在垃圾收集上的时间不得超过N毫秒）</li>
+</ul>
+<p>使用G1收集器时，Java堆的内存布局与就与其他收集器有很大差别，它将整个Java堆划分为多个大小相等的独立区域（Region），虽然还保留有新生代和老年代的概念，但新生代和老年代不再是物理隔离的了，它们都是一部分Region（不需要连续）的集合。</p>
+<p>工作过程可以分为如下几步 ：</p>
+<ul>
+<li>初始标记（Initial Marking） 标记一下GC Roots能够关联的对象，并且修改TAMS的值，需要暂停用户线程</li>
+<li>并发标记（Concurrent Marking） 从GC Roots进行可达性分析，找出存活的对象，与用户线程并发执行</li>
+<li>最终标记（Final Marking） 修正在并发标记阶段因为用户程序的并发执行导致变动的数据，需暂停用户线程</li>
+<li>筛选回收（Live Data Counting and Evacuation） 对各个Region的回收价值和成本进行排序，根据用户所期望的GC停顿时间制定回收计划</li>
+</ul>
+<p>判断是否需要使用G1收集器？</p>
+<ul>
+<li>50%以上的堆被存活对象占用</li>
+<li>对象分配和晋升的速度变化非常大</li>
+<li>垃圾回收时间比较长</li>
+</ul>
+<h3 id="垃圾收集器分类">垃圾收集器分类</h3>
+<ul>
+<li>
+<p>串行收集器-&gt;Serial和Serial Old</p>
+<blockquote>
+<p>只能有一个垃圾回收线程执行，用户线程暂停。 适用于内存比较小的嵌入式设备 。</p>
+</blockquote>
+</li>
+<li>
+<p>并行收集器[吞吐量优先]-&gt;Parallel Scanvenge、Parallel Old</p>
+<blockquote>
+<p>多条垃圾收集线程并行工作，但此时用户线程仍然处于等待状态。 适用于科学计算、后台处理等若交互场景 。</p>
+</blockquote>
+</li>
+<li>
+<p>并发收集器[停顿时间优先]-&gt;CMS、G1</p>
+<blockquote>
+<p>用户线程和垃圾收集线程同时执行(但并不一定是并行的，可能是交替执行的)，垃圾收集线程在执行的时候不会停顿用户线程的运行。 适用于相对时间有要求的场景，比如Web 。</p>
+</blockquote>
+</li>
+</ul>
+<h3 id="吞吐量和停顿时间">吞吐量和停顿时间</h3>
+<ul>
+<li>停顿时间：垃圾收集器进行垃圾回收终端应用执行响应的时间</li>
+<li>吞吐量：运行用户代码时间/(运行用户代码时间+垃圾收集时间)</li>
+</ul>
+<h3 id="如何选择合适的垃圾收集器">如何选择合适的垃圾收集器</h3>
+<ul>
+<li>优先调整堆的大小让服务器自己来选择</li>
+<li>如果内存小于100M，使用串行收集器</li>
+<li>如果是单核，并且没有停顿时间要求，使用串行或JVM自己选</li>
+<li>如果允许停顿时间超过1秒，选择并行或JVM自己选</li>
+<li>如果响应时间最重要，并且不能超过1秒，使用并发收集器</li>
+<li>对于G1收集</li>
+</ul>
+
+            </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://k-21d.github.io/post/jvm-xue-xi-yi/">
+                  <h3 class="post-title">
+                    JVM学习(一)
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+
+<script type="application/javascript">
+
+AOS.init();
+
+hljs.initHighlightingOnLoad()
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+  </body>
+</html>
