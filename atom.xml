@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://k-21d.github.io</id>
     <title>学习博客</title>
-    <updated>2020-04-08T17:04:06.200Z</updated>
+    <updated>2020-04-10T16:20:50.252Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://k-21d.github.io"/>
     <link rel="self" href="https://k-21d.github.io/atom.xml"/>
@@ -1984,6 +1984,279 @@ object.</li>
 ]]></content>
     </entry>
     <entry>
+        <title type="html"><![CDATA[JVM学习(三)]]></title>
+        <id>https://k-21d.github.io/post/jvm-xue-xi-san/</id>
+        <link href="https://k-21d.github.io/post/jvm-xue-xi-san/">
+        </link>
+        <updated>2019-03-30T11:19:55.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="jvm参数">JVM参数</h2>
+<h3 id="标准参数">标准参数</h3>
+<pre><code>-version
+-help
+-server
+-cp
+</code></pre>
+<h3 id="-x参数">-X参数</h3>
+<blockquote>
+<p>非标准参数，也就是在JDK各个版本中可能会变动</p>
+</blockquote>
+<pre><code>-Xint 解释执行
+-Xcomp 第一次使用就编译成本地代码
+-Xmixed 混合模式，JVM自己来决定
+</code></pre>
+<h3 id="-xx参数">-XX参数</h3>
+<blockquote>
+<p>非标准化参数，相对不稳定，主要用于JVM调优和Debug</p>
+</blockquote>
+<pre><code>a.Boolean类型
+格式：-XX:[+-]&lt;name&gt; +或-表示启用或者禁用name属性
+比如：-XX:+UseConcMarkSweepGC 表示启用CMS类型的垃圾回收器
+-XX:+UseG1GC 表示启用G1类型的垃圾回收器
+b.非Boolean类型
+格式：-XX&lt;name&gt;=&lt;value&gt;表示name属性的值是value
+比如：-XX:MaxGCPauseMillis=500
+</code></pre>
+<h3 id="其他参数">其他参数</h3>
+<pre><code>-Xms1000等价于-XX:InitialHeapSize=1000
+-Xmx1000等价于-XX:MaxHeapSize=1000
+-Xss100等价于-XX:ThreadStackSize=100
+</code></pre>
+<h3 id="查看参数">查看参数</h3>
+<pre><code>java -XX:+PrintFlagsFinal -version &gt; flags.txt
+</code></pre>
+<p>导出当前JVM所有参数</p>
+<pre><code>[Global flags]
+ccstrlist AOTLibrary                               =        {product} {default}
+    uintx AdaptiveSizeDecrementScaleFactor         = 4      {product} {default}
+    uintx AdaptiveSizeMajorGCDecayTimeScale        = 10     {product} {default}
+    uintx AdaptiveSizePolicyCollectionCostMargin   = 50     {product} {default}
+    uintx AdaptiveSizePolicyInitializingSteps      = 20     {product} {default}
+    uintx AdaptiveSizePolicyOutputInterval         = 0      {product} {default}
+	......
+</code></pre>
+<h2 id="常用命令">常用命令</h2>
+<h3 id="jps">jps</h3>
+<blockquote>
+<p>查看java进程</p>
+</blockquote>
+<h3 id="jinfo">jinfo</h3>
+<ol>
+<li>
+<p>实时查看和调整JVM配置参数</p>
+</li>
+<li>
+<p>查看</p>
+<blockquote>
+<p>jinfo -flag name PID 查看某个java进程的name属性的值</p>
+</blockquote>
+</li>
+<li>
+<p>修改</p>
+<blockquote>
+<p>参数只有被标记为manageable的flags可以被实时修改</p>
+<p>jinfo -flag [+|-] PID<br>
+jinfo -flag = PID</p>
+</blockquote>
+</li>
+<li>
+<p>查看曾经赋过值的一些参数</p>
+<blockquote>
+<p>jinfo -flags PID</p>
+</blockquote>
+</li>
+</ol>
+<h3 id="jstat">jstat</h3>
+<ol>
+<li>
+<p>查看虚拟机性能统计信息</p>
+</li>
+<li>
+<p>查看类装载信息</p>
+<blockquote>
+<p>jstat -class PID 1000 10 查看某个java进程的类装载信息，每1000毫秒输出一次，共输出10次</p>
+</blockquote>
+<pre><code>Loaded  Bytes  Unloaded  Bytes     Time
+  6382 11595.6        0     0.0       8.34
+  6382 11595.6        0     0.0       8.34
+  6382 11595.6        0     0.0       8.34
+  6382 11595.6        0     0.0       8.34
+  6382 11595.6        0     0.0       8.34
+  6382 11595.6        0     0.0       8.34
+  6382 11595.6        0     0.0       8.34
+  6382 11595.6        0     0.0       8.34
+  6382 11595.6        0     0.0       8.34
+  6382 11595.6        0     0.0       8.34
+</code></pre>
+</li>
+<li>
+<p>查看垃圾收集信息</p>
+<blockquote>
+<p>jstat -gc PID 1000 10</p>
+</blockquote>
+<pre><code> S0C    S1C    S0U    S1U      EC       EU        OC         OU       MC     MU    CCSC   CCSU   YGC     YGCT    FGC    FGCT     GCT
+22528.0 23040.0  0.0    0.0   125440.0  8855.3   221184.0    9798.0   43008.0 34261.3 9728.0 4370.4      6    0.107   3      0.255    0.362
+22528.0 23040.0  0.0    0.0   125440.0  8855.3   221184.0    9798.0   43008.0 34261.3 9728.0 4370.4      6    0.107   3      0.255    0.362
+22528.0 23040.0  0.0    0.0   125440.0  8855.3   221184.0    9798.0   43008.0 34261.3 9728.0 4370.4      6    0.107   3      0.255    0.362
+22528.0 23040.0  0.0    0.0   125440.0  8855.3   221184.0    9798.0   43008.0 34261.3 9728.0 4370.4      6    0.107   3      0.255    0.362
+22528.0 23040.0  0.0    0.0   125440.0  8855.3   221184.0    9798.0   43008.0 34261.3 9728.0 4370.4      6    0.107   3      0.255    0.362
+22528.0 23040.0  0.0    0.0   125440.0  8855.3   221184.0    9798.0   43008.0 34261.3 9728.0 4370.4      6    0.107   3      0.255    0.362
+22528.0 23040.0  0.0    0.0   125440.0  8855.3   221184.0    9798.0   43008.0 34261.3 9728.0 4370.4      6    0.107   3      0.255    0.362
+22528.0 23040.0  0.0    0.0   125440.0  8855.3   221184.0    9798.0   43008.0 34261.3 9728.0 4370.4      6    0.107   3      0.255    0.362
+22528.0 23040.0  0.0    0.0   125440.0  8855.3   221184.0    9798.0   43008.0 34261.3 9728.0 4370.4      6    0.107   3      0.255    0.362
+22528.0 23040.0  0.0    0.0   125440.0  8855.3   221184.0    9798.0   43008.0 34261.3 9728.0 4370.4      6    0.107   3      0.255    0.362
+</code></pre>
+</li>
+</ol>
+<h3 id="jstack">jstack</h3>
+<ol>
+<li>
+<p>查看线程堆栈信息</p>
+</li>
+<li>
+<p>用法</p>
+<blockquote>
+<p>jstack PID</p>
+</blockquote>
+</li>
+</ol>
+<h3 id="jmap">jmap</h3>
+<ol>
+<li>
+<p>生成堆转储快照</p>
+</li>
+<li>
+<p>打印出堆内存相关信息</p>
+<blockquote>
+<p>-XX:+PrintFlagsFinal -Xms300M -Xmx300M<br>
+jmap -heap PID</p>
+</blockquote>
+</li>
+<li>
+<p>dump出堆内存相关信息</p>
+<blockquote>
+<p>jmap -dump:format=b,file=heap.hprof PID</p>
+</blockquote>
+</li>
+<li>
+<p>在发生堆内存溢出的时候，自动dump文件</p>
+<blockquote>
+<p>-XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=heap.hprof</p>
+</blockquote>
+</li>
+</ol>
+<h2 id="常用工具">常用工具</h2>
+<h3 id="jconsole">jconsole</h3>
+<p>JConsole工具是JDK自带的可视化监控工具。查看java应用程序的运行概况、监控堆信息、永久区使用情况、类加载情况等。</p>
+<figure data-type="image" tabindex="1"><img src="https://cdn.nlark.com/yuque/0/2020/png/713413/1586535385947-f5880d06-97dc-4d5c-99dd-86f1b8ec5aa1.png" alt="jconsole" loading="lazy"></figure>
+<h3 id="jvisualvm">jvisualvm</h3>
+<figure data-type="image" tabindex="2"><img src="https://cdn.nlark.com/yuque/0/2020/png/713413/1586535392851-31a001bc-f758-4560-a835-0f14eda06072.png" alt="jvisualvm" loading="lazy"></figure>
+<h3 id="arthas">Arthas</h3>
+<p>github ：https://github.com/alibaba/arthas</p>
+<p>启动arthas</p>
+<pre><code>curl -O https://alibaba.github.io/arthas/arthas-boot.jar
+java -jar arthas-boot.jar
+</code></pre>
+<h4 id="常用命令-2">常用命令</h4>
+<pre><code>version:查看arthas版本号
+help:查看命名帮助信息
+cls:清空屏幕
+session:查看当前会话信息
+quit:退出arthas客户端
+---
+dashboard:当前进程的实时数据面板
+thread:当前JVM的线程堆栈信息
+jvm:查看当前JVM的信息
+sysprop:查看JVM的系统属性
+---
+sc:查看JVM已经加载的类信息
+dump:dump已经加载类的byte code到特定目录
+jad:反编译指定已加载类的源码
+---
+monitor:方法执行监控
+watch:方法执行数据观测
+trace:方法内部调用路径，并输出方法路径上的每个节点上耗时
+stack:输出当前方法被调用的调用路径
+......
+</code></pre>
+<h3 id="mat">MAT</h3>
+<blockquote>
+<p>Java堆分析器，用于查找内存泄漏</p>
+<p>Heap Dump，称为堆转储文件，是Java进程在某个时间内的快照</p>
+<p>下载地址 ：https://www.eclipse.org/mat/downloads.php</p>
+</blockquote>
+<h4 id="dump信息包含的内容">Dump信息包含的内容</h4>
+<ul>
+<li>
+<p>All Objects</p>
+<blockquote>
+<p>Class, fields, primitive values and references</p>
+</blockquote>
+</li>
+<li>
+<p>All Classes</p>
+<blockquote>
+<p>Classloader, name, super class, static fields</p>
+</blockquote>
+</li>
+<li>
+<p>Garbage Collection Roots</p>
+<blockquote>
+<p>Objects defined to be reachable by the JVM</p>
+</blockquote>
+</li>
+<li>
+<p>Thread Stacks and Local Variables</p>
+<blockquote>
+<p>The call-stacks of threads at the moment of the snapshot, and per-frame information about local<br>
+objects</p>
+</blockquote>
+</li>
+</ul>
+<h4 id="获取dump文件">获取Dump文件</h4>
+<ol>
+<li>
+<p>手动</p>
+<pre><code>jmap -dump:format=b,file=heap.hprof PID
+</code></pre>
+</li>
+<li>
+<p>自动</p>
+</li>
+</ol>
+<pre><code>-XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=heap.hprof
+</code></pre>
+<h4 id="使用">使用</h4>
+<ul>
+<li>
+<p>Histogram</p>
+<blockquote>
+<p>Histogram可以列出内存中的对象，对象的个数及其大小</p>
+</blockquote>
+</li>
+<li>
+<p>Leak Suspects</p>
+<blockquote>
+<p>查找并分析内存泄漏的可能原因</p>
+</blockquote>
+</li>
+<li>
+<p>Top Consumers</p>
+<blockquote>
+<p>列出大对象</p>
+</blockquote>
+</li>
+</ul>
+<h3 id="gc日志分析工具">GC日志分析工具</h3>
+<p>获取GC日志文件</p>
+<pre><code>-XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+PrintGCDateStamps -Xloggc:gc.log
+</code></pre>
+<ul>
+<li>GCViewer</li>
+<li>http://gceasy.io</li>
+</ul>
+]]></content>
+    </entry>
+    <entry>
         <title type="html"><![CDATA[JVM学习(二)]]></title>
         <id>https://k-21d.github.io/post/jvm-xue-xi-er/</id>
         <link href="https://k-21d.github.io/post/jvm-xue-xi-er/">
@@ -2579,203 +2852,6 @@ class Person {
 </blockquote>
 <h3 id="native-method-stacks本地方法栈">Native Method Stacks(本地方法栈)</h3>
 <p>如果当前线程执行的方法是Native类型的，这些方法就会在本地方法栈中执行。</p>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Spring Cloud Gateway]]></title>
-        <id>https://k-21d.github.io/post/spring-cloud-gateway/</id>
-        <link href="https://k-21d.github.io/post/spring-cloud-gateway/">
-        </link>
-        <updated>2019-03-02T13:39:05.000Z</updated>
-        <content type="html"><![CDATA[<h2 id="spring-cloud-gateway">Spring Cloud Gateway</h2>
-<p>Spring WebFlux</p>
-<p>目的：去 Servlet 化（Java EE Web 技术中心）</p>
-<p>技术：Reactor + Netty + Lambda</p>
-<p>最新技术：Spring Cloud Function</p>
-<h3 id="取代-zuul-1x基于-servlet">取代 Zuul 1.x（基于 Servlet）</h3>
-<ul>
-<li>
-<p>Resin Servlet 容器</p>
-<ul>
-<li>可以 Nginx 匹敌</li>
-</ul>
-</li>
-<li>
-<p>Tomcat Servlet 容器</p>
-<ul>
-<li>连接器
-<ul>
-<li>Java Blocking Connector</li>
-<li>Java Non Blocking Connector</li>
-<li>APR/native Connector</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>
-<p>JBoss</p>
-</li>
-<li>
-<p>Weblogic</p>
-</li>
-<li>
-<p>Netflix Zuul 自己的实现</p>
-<ul>
-<li>实现 API 不是非常友好</li>
-</ul>
-</li>
-</ul>
-<h4 id="zuul-实现原理">Zuul 实现原理</h4>
-<ul>
-<li><code>@Enable</code> 模块装配
-<ul>
-<li><code>@EnableZuulProxy</code></li>
-<li>配合注解：<code>@Import</code></li>
-</ul>
-</li>
-<li>依赖服务发现
-<ul>
-<li>我是谁</li>
-<li>目的服务在哪里</li>
-</ul>
-</li>
-<li>依赖服务路由
-<ul>
-<li>URI 映射到目的服务</li>
-</ul>
-</li>
-<li>依赖服务熔断（可选）</li>
-</ul>
-<h3 id="服务发现">服务发现</h3>
-<h4 id="举例说明">举例说明</h4>
-<p>假设 URI : <code>/gateway/spring-cloud-server-application/say</code></p>
-<p>其中 Servlet Path ：<code>/gateway</code></p>
-<p><code>spring-cloud-server-application</code> 是服务的应用名称</p>
-<p><code>/say</code> 是 <code>spring-cloud-server-application</code> 的服务 URI</p>
-<pre><code class="language-java">/**
- * 服务网关的路由规则
- * /{service-name}/{service-uri}
- * /gateway/rest-api/hello-world-&gt; http://127.0.0.1:8080/hello-world
- */
-@WebServlet(name = &quot;gateway&quot;, urlPatterns = &quot;/gateway/*&quot;)
-public class GatewayServlet extends HttpServlet {
-
-    @Autowired
-    private DiscoveryClient discoveryClient;
-
-    private ServiceInstance randomChoose(String serviceName) {
-        // 获取服务实例列表（服务IP、端口、是否为HTTPS）
-        List&lt;ServiceInstance&gt; serviceInstances = discoveryClient.getInstances(serviceName);
-        // 获得服务实例总数
-        int size = serviceInstances.size();
-        // 随机获取数组下标
-        int index = new Random().nextInt(size);
-        return serviceInstances.get(index);
-    }
-
-    @Override
-    public void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // ${service-name}/${service-uri}
-        String pathInfo = request.getPathInfo();
-        String[] parts = StringUtils.split(pathInfo.substring(1), &quot;/&quot;);
-        // 获取服务名称
-        String serviceName = parts[0];
-        // 获取服务 URI
-        String serviceURI = &quot;/&quot; + parts[1];
-        // 随机选择一台服务实例
-        ServiceInstance serviceInstance = randomChoose(serviceName);
-        // 构建目标服务 URL -&gt; scheme://ip:port/serviceURI
-        String targetURL = buildTargetURL(serviceInstance, serviceURI, request);
-
-        // 创建转发客户端
-        RestTemplate restTemplate = new RestTemplate();
-
-        // 构造 Request 实体
-        RequestEntity&lt;byte[]&gt; requestEntity = null;
-        try {
-            requestEntity = createRequestEntity(request, targetURL);
-            ResponseEntity&lt;byte[]&gt; responseEntity = restTemplate.exchange(requestEntity, byte[].class);
-            writeHeaders(responseEntity, response);
-            writeBody(responseEntity, response);
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private String buildTargetURL(ServiceInstance serviceInstance, String serviceURI, HttpServletRequest request) {
-        StringBuilder urlBuilder = new StringBuilder();
-        urlBuilder.append(serviceInstance.isSecure() ? &quot;https://&quot; : &quot;http://&quot;)
-                .append(serviceInstance.getHost()).append(&quot;:&quot;).append(serviceInstance.getPort())
-                .append(serviceURI);
-        String queryString = request.getQueryString();
-        if (StringUtils.hasText(queryString)) {
-            urlBuilder.append(&quot;?&quot;).append(queryString);
-        }
-        return urlBuilder.toString();
-    }
-
-    private RequestEntity&lt;byte[]&gt; createRequestEntity(HttpServletRequest request, String url) throws URISyntaxException, IOException {
-        // 获取当前请求方法
-        String method = request.getMethod();
-        // 装换 HttpMethod
-        HttpMethod httpMethod = HttpMethod.resolve(method);
-        byte[] body = createRequestBody(request);
-        MultiValueMap&lt;String, String&gt; headers = createRequestHeaders(request);
-        RequestEntity&lt;byte[]&gt; requestEntity = new RequestEntity&lt;byte[]&gt;(body, headers, httpMethod, new URI(url));
-        return requestEntity;
-    }
-
-    private MultiValueMap&lt;String, String&gt; createRequestHeaders(HttpServletRequest request) {
-        HttpHeaders headers = new HttpHeaders();
-        List&lt;String&gt; headerNames = Collections.list(request.getHeaderNames());
-        for (String headerName : headerNames) {
-            List&lt;String&gt; headerValues = Collections.list(request.getHeaders(headerName));
-            for (String headerValue : headerValues) {
-                headers.add(headerName, headerValue);
-            }
-        }
-        return headers;
-    }
-
-    private byte[] createRequestBody(HttpServletRequest request) throws IOException {
-        InputStream inputStream = request.getInputStream();
-        return StreamUtils.copyToByteArray(inputStream);
-    }
-
-
-    /**
-     * 输出 Body 部分
-     *
-     * @param responseEntity
-     * @param response
-     * @throws IOException
-     */
-    private void writeBody(ResponseEntity&lt;byte[]&gt; responseEntity, HttpServletResponse response) throws IOException {
-        if (responseEntity.hasBody()) {
-            byte[] body = responseEntity.getBody();
-            // 输出二进值
-            ServletOutputStream outputStream = response.getOutputStream();
-            // 输出 ServletOutputStream
-            outputStream.write(body);
-            outputStream.flush();
-        }
-    }
-
-    private void writeHeaders(ResponseEntity&lt;byte[]&gt; responseEntity, HttpServletResponse response) {
-        // 获取相应头
-        HttpHeaders httpHeaders = responseEntity.getHeaders();
-        // 输出转发 Response 头
-        for (Map.Entry&lt;String, List&lt;String&gt;&gt; entry : httpHeaders.entrySet()) {
-            String headerName = entry.getKey();
-            List&lt;String&gt; headerValues = entry.getValue();
-            for (String headerValue : headerValues) {
-                response.addHeader(headerName, headerValue);
-            }
-        }
-    }
-
-}
-</code></pre>
 ]]></content>
     </entry>
 </feed>
